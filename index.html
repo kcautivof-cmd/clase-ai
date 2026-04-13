@@ -1273,12 +1273,12 @@ function renderSrcs(){
 //  SESSION TABS
 // ═══════════════════════════════════════════════════════════════
 function stab(t){
-  ['tools','cards','quiz','chat','transcript','export'].forEach(x=>{
+  ['tools','cards','quiz','chat','transcript','text','export'].forEach(x=>{
     document.getElementById('sp-'+x).style.display=x===t?'block':'none';
     document.getElementById('st-'+x).classList.toggle('on',x===t);
     const bn=document.getElementById('bn-'+x);if(bn)bn.classList.toggle('on',x===t);
   });
-  if(t==='transcript') loadTranscriptEditor();
+  if(t==='transcript'||t==='text') loadTranscriptEditor();
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -1860,7 +1860,7 @@ async function startRec(){
 
   connectLiveTranscription();
   S.proc.onaudioprocess=ev=>{
-    if(!S.isRec||S.iPaused||S.pendingStop)return;
+    if(!S.isRec||S.isPaused||S.pendingStop)return;
     const input=ev.inputBuffer.getChannelData(0);
     const copy=new Float32Array(input.length);
     copy.set(input);
@@ -1981,142 +1981,286 @@ async function callParts(parts,{onRetry}={}){
 //  TOOLS
 // ═══════════════════════════════════════════════════════════════
 const QUALITY_RULES=`
-Trabaja como un asistente académico de alta calidad, orientado a estudio serio.
-Usa solo la información realmente presente en la transcripción y fuentes del cuaderno.
-No inventes datos, fechas, definiciones ni conclusiones.
-Si algo es ambiguo o quedó incompleto en la grabación, dilo de forma breve.
-Prioriza: claridad, estructura, precisión conceptual y utilidad para estudiar.
-Corrige muletillas, repeticiones y desorden oral de clase, pero sin alterar el sentido.
-Convierte frases habladas en apuntes limpios y académicos.
-Evita relleno y frases vacías.
-Responde siempre en español claro, natural y útil para repasar.
+Eres un asistente académico de élite. Tu output debe ser tan bueno que un estudiante lo prefiera sobre los apuntes de cualquier compañero.
+REGLAS ABSOLUTAS:
+1. Usa EXCLUSIVAMENTE la información presente en la transcripción y fuentes. No añadas datos externos.
+2. Si algo quedó incompleto o ambiguo en la grabación, señálalo explícitamente con [⚠️ incompleto en grabación].
+3. Convierte lenguaje oral (muletillas, repeticiones, frases incompletas) en prosa académica limpia sin alterar el significado.
+4. Prioriza: precisión conceptual > utilidad para repasar > estructura clara.
+5. Nunca uses frases vacías como "es importante destacar" o "como podemos ver". Ve directo al contenido.
+6. Responde siempre en español académico, claro y natural.
+7. Si el contenido es escaso o la grabación es corta, adapta la extensión — no rellenes con generalidades.
 `;
 
 const P={
   summary:c=>`${QUALITY_RULES}
-Genera un resumen de estudio estilo cuaderno inteligente.
-Formato markdown con este orden exacto:
-# Resumen
-## Tema central
-## Ideas clave
-- 6 a 10 viñetas sustantivas
-## Conceptos importantes
-- término: explicación breve
-## Conclusión académica
-## Vacíos o dudas detectadas
-- solo si realmente faltan datos
 
-No hagas un resumen genérico: sintetiza, ordena y limpia la clase.
+TAREA: Genera un resumen de estudio premium. No un resumen cualquiera: el objetivo es que el alumno pueda repasar toda la clase en 3 minutos y recordar el 80% del contenido.
+
+FORMATO OBLIGATORIO (respeta exactamente estos headers):
+# 📚 Resumen — [inserta el tema real de la clase aquí]
+
+## 🎯 Idea central
+Una sola frase que capture la esencia de la clase.
+
+## 🧩 Ideas clave
+- [idea sustantiva con contexto suficiente para entenderse sola]
+(mínimo 6, máximo 10 — solo si realmente aparecen en el contenido)
+
+## 📖 Conceptos y definiciones
+| Término | Definición | Relevancia |
+|---------|------------|------------|
+(solo términos realmente definidos o explicados en la clase)
+
+## 🔗 Relaciones entre ideas
+Explica en 2-3 frases cómo se conectan los conceptos principales entre sí.
+
+## 💡 Para recordar
+3 bullets con las ideas más importantes, formuladas como reglas o principios memorables.
+
+## ❓ Dudas o vacíos detectados
+(omitir esta sección si no hay vacíos reales)
 
 CONTENIDO:
 ${c}`,
+
   outline:c=>`${QUALITY_RULES}
-Convierte el contenido en un esquema de estudio de alta calidad.
-Formato markdown jerárquico:
-# Esquema
-I. Tema principal
-A. Subtema
-1. Idea
-a. detalle si aplica
 
-Agrupa por bloques temáticos reales, no por orden literal de la grabación.
+TAREA: Convierte esta clase en un esquema de estudio jerárquico. El esquema debe reflejar la ESTRUCTURA LÓGICA del contenido, no el orden cronológico de la grabación.
+
+FORMATO OBLIGATORIO:
+# 🗂️ Esquema — [tema de la clase]
+
+## Bloque temático 1: [nombre real del bloque]
+### A. [Subtema]
+- **[Concepto clave]:** explicación breve
+- Detalle de apoyo si existe
+### B. [Subtema]
+...
+
+(Crea todos los bloques temáticos que el contenido justifique — mínimo 3, máximo 6)
+
+## 🔑 Conceptos transversales
+Ideas que aparecen en múltiples bloques y conectan el tema.
+
+## 📌 Jerarquía de importancia
+1. [Lo más importante]
+2. [Segundo más importante]
+3. [Tercero]
 
 CONTENIDO:
 ${c}`,
+
   questions:c=>`${QUALITY_RULES}
-Genera 10 preguntas de repaso con respuesta breve y precisa.
-Incluye mezcla de memoria, comprensión, relación y aplicación.
-Formato markdown numerado:
-1. Pregunta
-   - Respuesta:
-   - Por qué importa:
+
+TAREA: Genera 12 preguntas de repaso que realmente pongan a prueba si el alumno entendió la clase. Distribución obligatoria:
+- 3 preguntas de MEMORIA (definiciones, datos, nombres)
+- 4 preguntas de COMPRENSIÓN (explicar con palabras propias, relacionar)
+- 3 preguntas de APLICACIÓN (usar el concepto en un contexto nuevo)
+- 2 preguntas de ANÁLISIS (comparar, criticar, evaluar)
+
+FORMATO para cada pregunta:
+### Pregunta N · [Memoria/Comprensión/Aplicación/Análisis]
+**❓ [La pregunta]**
+> **Respuesta:** [respuesta directa y precisa]
+> **Por qué importa:** [una frase sobre la relevancia de este punto]
 
 CONTENIDO:
 ${c}`,
+
   mindmap:c=>`${QUALITY_RULES}
-Genera un mapa mental textual útil para estudiar.
-Formato:
-TEMA CENTRAL
-→ Rama
-  → Subidea
-    → Detalle
 
-Usa ramas conceptuales reales, no frases largas.
+TAREA: Genera un mapa mental textual óptimo para visualización. Será renderizado como SVG interactivo, por eso el formato debe ser EXACTO.
+
+FORMATO OBLIGATORIO (sin variaciones):
+[TEMA CENTRAL — máx 4 palabras]
+→ [Rama principal 1 — máx 3 palabras]
+  → [Sub-idea — máx 5 palabras]
+    → [Detalle si aplica]
+  → [Sub-idea]
+→ [Rama principal 2]
+  → [Sub-idea]
+→ [Rama principal 3]
+  → [Sub-idea]
+
+REGLAS:
+- Exactamente entre 4 y 6 ramas principales
+- Máximo 3 sub-ideas por rama
+- Máximo 2 detalles por sub-idea
+- Frases cortas, sin verbos auxiliares
+- Las ramas deben ser los conceptos REALES del contenido, no categorías genéricas
 
 CONTENIDO:
 ${c}`,
+
   presentation:c=>`${QUALITY_RULES}
-Genera una presentación académica clara.
-Formato exacto:
-# Título general
-## Diapositiva 1: ...
-- 4 bullets
-- Nota del expositor: ...
+
+TAREA: Genera una presentación académica lista para usar. Cada diapositiva debe tener contenido sustancial — no bullets vagos.
+
+FORMATO OBLIGATORIO:
+# [Título impactante de la presentación]
+**Subtítulo:** [contexto breve]
+
 ---
-Haz 6 diapositivas más cierre final.
-No repitas ideas entre slides.
+## Diapositiva 1: [título específico]
+**Idea central:** [una frase]
+- [Punto sustantivo con datos o explicación]
+- [Punto sustantivo]
+- [Punto sustantivo]
+- [Punto sustantivo]
+*Nota del expositor: [qué enfatizar al hablar esta slide]*
+
+---
+(Repite para 6-7 diapositivas + 1 de conclusiones)
+
+---
+## Diapositiva final: Conclusiones y preguntas
+- [3 takeaways principales]
 
 CONTENIDO:
 ${c}`,
+
   report:c=>`${QUALITY_RULES}
-Redacta un informe académico sólido y limpio.
-Formato markdown:
-# Título
+
+TAREA: Redacta un informe académico formal y completo. El informe debe leerse como un documento entregable, no como notas.
+
+FORMATO OBLIGATORIO:
+# [Título formal del informe]
+**Fecha:** [si aparece] | **Fuente:** Transcripción de clase
+
+---
 ## Resumen ejecutivo
-## Desarrollo temático
-## Hallazgos o tesis centrales
-## Conclusiones
-## Puntos que requieren verificación
-- solo si aplica
+[2-3 párrafos que resuman el informe para quien no tenga tiempo de leerlo completo]
+
+## 1. Introducción y contexto
+[Sitúa el tema, por qué importa]
+
+## 2. Desarrollo temático
+### 2.1 [Subtema principal]
+[Prosa académica, párrafos completos]
+### 2.2 [Subtema]
+[...]
+
+## 3. Hallazgos y tesis centrales
+[Los argumentos o conclusiones más importantes del contenido]
+
+## 4. Análisis crítico
+[Fortalezas del argumento, limitaciones detectadas, preguntas abiertas]
+
+## 5. Conclusiones
+[Cierre formal con síntesis e implicaciones]
+
+## Referencias y fuentes mencionadas
+(solo si se citan en la grabación)
 
 CONTENIDO:
 ${c}`,
+
   infographic:c=>`${QUALITY_RULES}
-Genera contenido para una infografía académica.
-Formato:
-# Título
-## Bloque 1
-- Ícono sugerido
-- Idea fuerza
-- Dato o explicación
-Haz 5 bloques, con frases cortas y contundentes.
+
+TAREA: Diseña el contenido para una infografía académica de alta calidad. El resultado debe ser visualmente descriptivo — alguien debe poder diseñarla directamente a partir de tu texto.
+
+FORMATO OBLIGATORIO:
+# 📊 [Título de la infografía — directo y descriptivo]
+**Mensaje central:** [una frase que resuma todo]
+
+---
+## 🔷 Bloque 1: [Nombre del bloque]
+- **Ícono sugerido:** [emoji descriptivo]
+- **Titular:** [frase corta e impactante, máx 6 palabras]
+- **Dato o explicación:** [1-2 frases con el contenido real]
+- **Cifra destacada:** [si existe en el contenido, si no omitir]
+
+(Repite para 5-6 bloques)
+
+---
+## 🔗 Elemento de conexión
+[Cómo se relacionan los bloques — para el hilo visual de la infografía]
+
+## 📌 Llamada a la acción o conclusión
+[Una frase final impactante]
 
 CONTENIDO:
 ${c}`,
+
   datatable:c=>`${QUALITY_RULES}
-Extrae una o más tablas markdown realmente útiles para estudiar.
-Prioriza comparaciones, conceptos, autores, procesos, causas, efectos o etapas según el contenido.
-No inventes columnas que no se sostengan en la fuente.
+
+TAREA: Extrae TODAS las relaciones comparables del contenido y conviértelas en tablas markdown útiles para estudiar. Si el contenido permite múltiples tablas, crea todas las necesarias.
+
+INSTRUCCIONES:
+- Identifica: comparaciones, procesos secuenciales, causas-efectos, autores-teorías, ventajas-desventajas, etapas, clasificaciones
+- Cada tabla debe tener un título descriptivo
+- Las columnas deben ser simétricas y comparables
+- No inventes datos — si una celda no tiene información en el contenido, escribe "—"
+- Ordena las filas de más a menos importante
+
+FORMATO por tabla:
+### [Nombre descriptivo de la tabla]
+| [Col 1] | [Col 2] | [Col 3 si aplica] |
+|---------|---------|-------------------|
+| dato    | dato    | dato              |
+
+Si el contenido no tiene suficiente información para tablas comparativas, genera una tabla de "Conceptos y definiciones" con: Término | Definición | Ejemplo | Importancia.
 
 CONTENIDO:
 ${c}`,
+
   cards:c=>`${QUALITY_RULES}
-Genera 12 tarjetas de estudio de alta calidad.
-Cada tarjeta debe preguntar algo importante y responder de forma breve, precisa y memorizable.
-SOLO JSON válido:
-[{"q":"...","a":"..."}]
+
+TAREA: Genera exactamente 16 tarjetas de estudio de máxima calidad para el sistema de repetición espaciada.
+
+DISTRIBUCIÓN OBLIGATORIA:
+- 4 tarjetas de DEFINICIÓN ("¿Qué es X?")
+- 4 tarjetas de COMPRENSIÓN ("¿Cómo funciona X?" / "¿Por qué ocurre X?")
+- 4 tarjetas de RELACIÓN ("¿Cuál es la diferencia entre X e Y?" / "¿Cómo se relacionan X e Y?")
+- 4 tarjetas de APLICACIÓN ("¿En qué situación usarías X?" / "Da un ejemplo de X")
+
+CALIDAD de las respuestas:
+- Respuestas completas pero concisas (1-3 frases)
+- Que sean memorables — usa analogías si ayuda
+- Que sean autocontenidas (entendibles sin leer la pregunta)
+
+RESPONDE SOLO CON JSON VÁLIDO, sin markdown, sin comentarios:
+[{"q":"pregunta completa","a":"respuesta completa y precisa","tipo":"definicion|comprension|relacion|aplicacion"}]
 
 CONTENIDO:
 ${c}`,
+
   quiz:c=>`${QUALITY_RULES}
-Genera 8 preguntas tipo prueba de alta calidad.
-Cada una debe tener 4 opciones plausibles, una correcta y explicación breve.
-Evita opciones absurdas.
-SOLO JSON válido:
-[{"question":"...","options":["a","b","c","d"],"correct":0,"explanation":"..."}]
+
+TAREA: Genera 10 preguntas tipo examen de alta calidad. DISTRIBUCIÓN OBLIGATORIA de dificultad:
+- 3 preguntas FÁCILES (reconocimiento, definición directa)
+- 4 preguntas MEDIAS (comprensión, relación entre conceptos)
+- 3 preguntas DIFÍCILES (análisis, aplicación, síntesis)
+
+CALIDAD de las opciones:
+- Los distractores (opciones incorrectas) deben ser PLAUSIBLES — errores comunes reales, no absurdos
+- La opción correcta no debe ser siempre la más larga
+- La explicación debe enseñar, no solo confirmar la respuesta
+
+RESPONDE SOLO CON JSON VÁLIDO, sin markdown, sin comentarios:
+[{"question":"pregunta completa y clara","options":["opción A","opción B","opción C","opción D"],"correct":0,"explanation":"por qué es correcta y por qué las otras no","difficulty":"facil|media|dificil"}]
 
 CONTENIDO:
 ${c}`,
+
   chat:(c,q)=>`${QUALITY_RULES}
-Actúa como tutor académico riguroso.
-Responde usando solo lo estudiado en la transcripción y fuentes.
-Si la respuesta no está clara en el material, dilo.
-Primero responde directo. Luego añade una sección breve llamada "Para entenderlo mejor" solo si aporta valor.
+
+Actúa como tutor académico experto que conoce perfectamente este material de estudio.
+
+INSTRUCCIONES:
+- Responde DIRECTAMENTE la pregunta, sin rodeos
+- Usa SOLO el contenido del material proporcionado
+- Si la respuesta está en el material: sé preciso y cita el contexto
+- Si la respuesta NO está en el material: di "Eso no apareció en esta clase" y sugiere dónde podría encontrarse
+- Si la pregunta es ambigua: interpreta la versión más útil para el alumno y respóndela
+- Usa ejemplos del propio material cuando sea posible
+- Al final, añade "🔗 Relacionado:" con 1-2 conceptos del material que conectan con la pregunta (solo si aporta valor)
 
 MATERIAL DE ESTUDIO:
 ${c}
 
-PREGUNTA DEL ALUMNO: ${q}`
+PREGUNTA: ${q}`
 };
 
 async function runTool(action){
@@ -2171,6 +2315,7 @@ async function tryFallbackModel(action){
   }
   runTool(action);
 }
+function regenTool(){
   if(!S.lastTool)return;
   const sess=DB.sess(S.sessId);
   if(sess?.results){
@@ -2988,7 +3133,7 @@ goNb = function(nbId){
   setTimeout(updateReviewBtn,100);
 };
 
-
+window.addEventListener('load',()=>{
   document.getElementById('keyBtn').textContent='☁️';
   document.getElementById('apiIn').value=PROXY_BASE;
   const lbl=document.getElementById('modelLabel');
@@ -3162,7 +3307,7 @@ function injectEnhancementUI(){
       <div style="font-size:11px;color:var(--muted);line-height:1.7;margin-bottom:10px">
         Puedes corregir la transcripción antes de generar resumen, preguntas o tutor. Si no la editas, la app usa la versión automática.
       </div>
-      <textarea id="transcriptEditor" class="mi" style="min-height:260px;margin-bottom:10px"></textarea>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:8px">👆 Usa la pestaña 📄 para editar la transcripción</div>
       <div class="row" style="margin-bottom:10px">
         <button class="btn btn-g" style="flex:1" onclick="restoreRawTranscript()">Restaurar auto</button>
         <button class="btn btn-g" style="flex:1" onclick="insertEstimatedTimestamps()">Timestamps</button>
@@ -3239,53 +3384,153 @@ function insertEstimatedTimestamps(){
 Object.assign(P,{
   clean_notes:c=>`${QUALITY_RULES}
 ${buildModeContext()}
-Convierte esta transcripción oral en apuntes limpios, claros y académicos.
-Formato exacto:
-# Apuntes limpios
-## Tema central
-## Desarrollo por bloques
-- bloque 1:
-- bloque 2:
-- bloque 3:
-## Términos y definiciones
-## Datos, nombres o fechas mencionados
-## Cierre breve
-\n${c}`,
+
+TAREA: Convierte esta transcripción oral en apuntes universitarios de calidad profesional. El resultado debe verse como si lo hubiera tomado el mejor estudiante de la clase.
+
+PROCESO:
+1. Elimina: muletillas, repeticiones, tangentes, errores del hablante
+2. Reorganiza: pon las ideas en orden lógico, no cronológico
+3. Completa: conecta ideas que quedaron fragmentadas en la grabación
+4. Formatea: usa estructura académica clara
+
+FORMATO OBLIGATORIO:
+# 📝 Apuntes — [Tema real de la clase]
+*[Fecha si aparece] · [Duración estimada si se deduce]*
+
+## Introducción
+[Contexto y objetivo de la clase, 2-3 frases]
+
+## [Bloque temático 1]
+[Prosa limpia + bullets donde sea útil]
+
+## [Bloque temático 2]
+[...]
+
+## Conceptos y términos definidos
+| Término | Definición | Contexto de uso |
+|---------|------------|-----------------|
+
+## Ejemplos mencionados
+(solo si el profesor dio ejemplos concretos)
+
+## Cierre y conclusiones
+[Síntesis de cierre de la clase]
+
+## ⚠️ Fragmentos incompletos
+(menciones, referencias o ideas que quedaron sin desarrollar en la grabación)
+
+CONTENIDO:
+${c}`,
+
   layered_summary:c=>`${QUALITY_RULES}
 ${buildModeContext()}
-Genera un resumen por capas para estudiar rápido y luego profundizar.
-Formato exacto:
-# Resumen por capas
-## En 3 líneas
-## En 8 viñetas
-## Desarrollo breve
-## Conclusión final
-## Dudas o vacíos detectados
-\n${c}`,
+
+TAREA: Resumen por capas de profundidad creciente. El alumno puede leer solo la primera capa si tiene 30 segundos, o las tres si quiere repasar a fondo.
+
+FORMATO OBLIGATORIO:
+# 🪜 Resumen por capas — [Tema]
+
+---
+## ⚡ Capa 1: Los 30 segundos
+*Si solo puedes leer 3 líneas, lee estas.*
+[Exactamente 3 frases que capturen el núcleo de la clase]
+
+---
+## 📋 Capa 2: Los 3 minutos
+*El resumen completo para repasar rápido.*
+- [8-10 bullets sustantivos — cada uno autocontenido]
+
+---
+## 📚 Capa 3: Estudio profundo
+*Todo el contenido importante, organizado.*
+
+### [Subtema 1]
+[2-3 párrafos de prosa académica]
+
+### [Subtema 2]
+[...]
+
+---
+## 🎯 Lo que NO debes olvidar
+[3 puntos con los conceptos más críticos, formulados como principios]
+
+## ❓ Preguntas que deja abierta esta clase
+(solo si realmente quedan hilos sin resolver)
+
+CONTENIDO:
+${c}`,
+
   key_concepts:c=>`${QUALITY_RULES}
 ${buildModeContext()}
-Extrae solo los conceptos realmente presentes en el material.
-Formato exacto:
-# Conceptos clave
-## Lista principal
-- concepto:
-- definición o explicación:
-- por qué importa:
-## Relaciones entre conceptos
-## Posibles confusiones
-\n${c}`,
+
+TAREA: Extrae y explica todos los conceptos realmente importantes de esta clase. No hagas una lista genérica — cada concepto debe estar respaldado por el contenido.
+
+FORMATO OBLIGATORIO:
+# 🔑 Conceptos clave — [Tema]
+
+## Conceptos principales
+(ordenados de más a menos central en la clase)
+
+### [Nombre del concepto]
+- **Definición:** [cómo se definió en clase]
+- **Explicación:** [desarrollo en 1-2 frases]
+- **Ejemplo del contenido:** [si existe]
+- **Por qué importa:** [su relevancia en el tema]
+
+(Repite para cada concepto — mínimo 5, máximo 12)
+
+---
+## 🔗 Mapa de relaciones
+[Explica en prosa cómo se conectan los 3-4 conceptos más importantes entre sí]
+
+## ⚡ Jerarquía conceptual
+1. **Concepto central:** [el más importante y por qué]
+2. **Conceptos de segundo nivel:** [los que dependen del central]
+3. **Conceptos de apoyo:** [los periféricos]
+
+## ⚠️ Confusiones frecuentes
+[Pares de conceptos que se suelen confundir, si los hay en el contenido]
+
+CONTENIDO:
+${c}`,
+
   exam_focus:c=>`${QUALITY_RULES}
 ${buildModeContext()}
-Genera una guía de 'qué podría entrar' sin inventar.
-Formato exacto:
-# Posibles contenidos evaluables
-## Qué parece más preguntable
-- punto:
-- por qué podría entrar:
-## Comparaciones o relaciones importantes
-## Errores o trampas probables
-## Mini repaso final
-\n${c}`
+
+TAREA: Analiza esta clase como si fueras a diseñar el examen. Identifica exactamente qué podría evaluarse, con qué formato y por qué.
+
+FORMATO OBLIGATORIO:
+# 🎯 Guía de lo evaluable — [Tema]
+
+## 🔴 Muy probable que entre
+(lo que el profesor enfatizó, repitió o desarrolló extensamente)
+- **[Punto evaluable]:** [cómo podría preguntarse] · *Formato probable: [definición/aplicación/comparación/problema]*
+
+## 🟡 Probable que entre
+(conceptos importantes pero menos enfatizados)
+- **[Punto]:** [cómo podría preguntarse]
+
+## 🟢 Puede entrar como complemento
+(mencionado brevemente, podría aparecer en opciones múltiples)
+- [Lista breve]
+
+---
+## 🪤 Trampas y errores típicos
+[Confusiones o malentendidos comunes sobre este tema que suelen aparecer como distractores]
+
+## 📝 Mini repaso flash
+Preguntas directas para autoevaluar en 5 minutos:
+1. [Pregunta]
+2. [Pregunta]
+3. [Pregunta]
+4. [Pregunta]
+5. [Pregunta]
+
+## ⏱️ Estrategia de estudio recomendada
+[Qué repasar primero, qué memorizar, qué entender]
+
+CONTENIDO:
+${c}`
 });
 
 const oldStab = stab;
