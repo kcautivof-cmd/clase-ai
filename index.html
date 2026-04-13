@@ -8,6 +8,7 @@
 <meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"/>
 <meta content="Clase AI" name="apple-mobile-web-app-title"/>
 <meta content="#0a0b14" name="theme-color"/>
+<link rel="manifest" href="data:application/json;charset=utf-8,%7B%22name%22%3A%22Clase%20AI%22%2C%22short_name%22%3A%22ClaseAI%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%230a0b14%22%2C%22theme_color%22%3A%22%237c6fff%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%2C%253Csvg%2520xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%2520viewBox%3D%270%200%20192%20192%27%253E%253Crect%2520fill%3D%27%237c6fff%27%2520width%3D%27192%27%2520height%3D%27192%27%2520rx%3D%2748%27%2F%253E%253Ctext%2520y%3D%27140%27%2520x%3D%2796%27%2520text-anchor%3D%27middle%27%2520font-size%3D%27120%27%253E%25F0%259F%258E%2593%253C%2Ftext%253E%253C%2Fsvg%253E%22%2C%22sizes%22%3A%22192x192%22%7D%5D%7D"/>
 <title>Clase AI</title>
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
@@ -395,13 +396,14 @@ select.mi option{background:var(--s2);}
 <div class="view on" id="v-lib">
 <div class="lib-toprow">
 <div class="lib-search-wrap">
-<input class="lib-search" id="libSearch" oninput="filterLib(this.value)" placeholder="Buscar cuadernos..."/>
+<input class="lib-search" id="libSearch" oninput="filterLib(this.value)" placeholder="Buscar cuadernos y sesiones..."/>
 </div>
 <div class="t-btn" onclick="restoreBackup()" title="Importar backup">📥</div>
 <div class="t-btn" onclick="om('sync')" title="Sync nube">☁️</div>
 <button class="lib-new-btn" onclick="om('folder')">＋ Carpeta</button>
 </div>
 <div class="sync-banner" id="syncBanner"></div>
+<div id="globalSearchResults" style="display:none;margin-bottom:20px"></div>
 <div id="recSection" style="display:none">
 <div class="sec-label">🕐 Recientes</div>
 <div class="nb-grid" id="recGrid"></div>
@@ -470,6 +472,7 @@ select.mi option{background:var(--s2);}
 <div class="tab" id="st-cards" onclick="stab('cards')">🃏</div>
 <div class="tab" id="st-quiz" onclick="stab('quiz')">📝</div>
 <div class="tab" id="st-chat" onclick="stab('chat')">💬</div>
+<div class="tab" id="st-transcript" onclick="stab('transcript')">📄</div>
 <div class="tab" id="st-export" onclick="stab('export')">💾</div>
 </div>
 <!-- GENERAR -->
@@ -485,16 +488,27 @@ select.mi option{background:var(--s2);}
 <div class="tool-btn" id="tb-datatable" onclick="runTool('datatable')"><span class="ti">📊</span>Tabla</div>
 </div>
 <div class="result-box" id="resultBox"></div>
+<div id="resultActions" style="display:none;margin-top:8px;display:none;gap:8px">
+  <button class="btn btn-g" onclick="copyResult()" style="flex:1;font-size:12px">📋 Copiar</button>
+  <button class="btn btn-g" onclick="regenTool()" style="flex:1;font-size:12px">🔄 Regenerar</button>
+  <button class="btn btn-g" onclick="xport('result','md')" style="flex:1;font-size:12px">⬇️ .md</button>
+</div>
 </div>
 <!-- TARJETAS -->
 <div id="sp-cards" style="display:none">
-<button class="btn btn-p w100" onclick="loadCards()" style="margin-bottom:10px">🃏 Generar tarjetas</button>
+<div style="display:flex;gap:8px;margin-bottom:10px">
+  <button class="btn btn-p" onclick="loadCards()" style="flex:1">🃏 Generar tarjetas</button>
+  <button class="btn btn-g" onclick="regenCards()" style="flex:0 0 auto;padding:11px 14px" title="Regenerar">🔄</button>
+</div>
 <div style="font-size:11px;color:var(--muted);text-align:center;margin-bottom:10px">Toca para voltear</div>
 <div class="fc-grid" id="fcGrid"></div>
 </div>
 <!-- PRUEBA -->
 <div id="sp-quiz" style="display:none">
-<button class="btn btn-p w100" onclick="loadQuiz()" style="margin-bottom:10px">📝 Generar prueba</button>
+<div style="display:flex;gap:8px;margin-bottom:10px">
+  <button class="btn btn-p" onclick="loadQuiz()" style="flex:1">📝 Generar prueba</button>
+  <button class="btn btn-g" onclick="regenQuiz()" style="flex:0 0 auto;padding:11px 14px" title="Regenerar">🔄</button>
+</div>
 <div id="quizScore" style="display:none"></div>
 <div id="quizContainer"></div>
 </div>
@@ -507,22 +521,43 @@ select.mi option{background:var(--s2);}
 <button class="chat-send" onclick="sendChat()">➤</button>
 </div>
 </div>
+<!-- TRANSCRIPCIÓN -->
+<div id="sp-transcript" style="display:none">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+  <span style="font-size:11px;color:var(--muted)" id="transcriptWordCount"></span>
+  <div style="display:flex;gap:6px">
+    <button class="btn btn-g" onclick="copyTranscript()" style="font-size:11px;padding:6px 10px">📋 Copiar</button>
+    <button class="btn btn-g" onclick="xport('transcript','md')" style="font-size:11px;padding:6px 10px">⬇️ .md</button>
+  </div>
+</div>
+<textarea id="transcriptEditor" style="width:100%;min-height:320px;background:var(--s1);border:1px solid var(--border);border-radius:14px;color:var(--text);padding:14px;font-size:13px;line-height:1.8;outline:none;resize:vertical;font-family:inherit" placeholder="Transcripción de la sesión..." oninput="onTranscriptEdit(this.value)"></textarea>
+<div style="display:flex;gap:8px;margin-top:8px">
+  <button class="btn btn-p" onclick="saveTranscriptEdit()" style="flex:1;font-size:12px">💾 Guardar edición</button>
+  <button class="btn btn-g" onclick="autoTitleSess()" style="flex:1;font-size:12px">✨ Auto-título</button>
+</div>
+</div>
 <!-- EXPORTAR -->
 <div id="sp-export" style="display:none">
 <div class="sec-label" style="margin-bottom:10px">Transcripción</div>
 <div class="exp-grid" style="margin-bottom:14px">
 <div class="exp-card" onclick="xport('transcript','txt')"><span class="exp-icon">📄</span><span class="exp-title">TXT</span><span class="exp-sub">Texto plano</span></div>
+<div class="exp-card" onclick="xport('transcript','md')"><span class="exp-icon">🔖</span><span class="exp-title">Markdown</span><span class="exp-sub">.md</span></div>
 <div class="exp-card" onclick="xport('transcript','word')"><span class="exp-icon">🔵</span><span class="exp-title">Word .doc</span><span class="exp-sub">Microsoft Word</span></div>
+<div class="exp-card" onclick="shareContent('transcript')"><span class="exp-icon">📤</span><span class="exp-title">Compartir</span><span class="exp-sub">Enviar a app</span></div>
 </div>
 <div class="sec-label" style="margin-bottom:10px">Resultado generado</div>
 <div class="exp-grid" style="margin-bottom:14px">
 <div class="exp-card" onclick="xport('result','txt')"><span class="exp-icon">📝</span><span class="exp-title">TXT</span><span class="exp-sub">Texto plano</span></div>
+<div class="exp-card" onclick="xport('result','md')"><span class="exp-icon">🔖</span><span class="exp-title">Markdown</span><span class="exp-sub">.md</span></div>
 <div class="exp-card" onclick="xport('result','word')"><span class="exp-icon">🔵</span><span class="exp-title">Word .doc</span><span class="exp-sub">Formateado</span></div>
+<div class="exp-card" onclick="shareContent('result')"><span class="exp-icon">📤</span><span class="exp-title">Compartir</span><span class="exp-sub">Enviar a app</span></div>
 </div>
 <div class="sec-label" style="margin-bottom:10px">Todo completo</div>
 <div class="exp-grid">
 <div class="exp-card" onclick="xport('all','txt')"><span class="exp-icon">📦</span><span class="exp-title">TXT completo</span><span class="exp-sub">Todo en uno</span></div>
+<div class="exp-card" onclick="xport('all','md')"><span class="exp-icon">📦</span><span class="exp-title">Markdown</span><span class="exp-sub">Todo .md</span></div>
 <div class="exp-card" onclick="xport('all','word')"><span class="exp-icon">💼</span><span class="exp-title">Word completo</span><span class="exp-sub">Con formato</span></div>
+<div class="exp-card" onclick="shareContent('all')"><span class="exp-icon">📤</span><span class="exp-title">Compartir todo</span><span class="exp-sub">Enviar a app</span></div>
 </div>
 </div>
 </div>
@@ -533,6 +568,7 @@ select.mi option{background:var(--s2);}
 <div class="bnav-item" id="bn-cards" onclick="stab('cards')"><span class="bi">🃏</span>Tarjetas</div>
 <div class="bnav-item" id="bn-quiz" onclick="stab('quiz')"> <span class="bi">📝</span>Prueba</div>
 <div class="bnav-item" id="bn-chat" onclick="stab('chat')"> <span class="bi">💬</span>Tutor</div>
+<div class="bnav-item" id="bn-transcript" onclick="stab('transcript')"><span class="bi">📄</span>Texto</div>
 <div class="bnav-item" id="bn-export" onclick="stab('export')"><span class="bi">💾</span>Exportar</div>
 </nav>
 </div><!-- /app -->
@@ -550,6 +586,14 @@ select.mi option{background:var(--s2);}
 <div class="overlay" id="m-sync" onclick="if(event.target===this)cm('sync')">
 <div class="modal">
 <div class="modal-title">☁️ Sincronización entre dispositivos</div>
+<div style="margin-bottom:14px">
+  <div style="display:flex;justify-content:space-between;font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px">
+    <span>Almacenamiento local</span><span id="storageLbl">— KB</span>
+  </div>
+  <div style="background:var(--s3);border-radius:6px;height:5px;overflow:hidden">
+    <div id="storageBar" style="height:100%;width:0%;background:var(--accent);transition:width .4s,background .4s;border-radius:6px"></div>
+  </div>
+</div>
 <div class="ml">Código de sincronización</div>
 <input class="mi" id="syncCode" placeholder="Ej: kevin-clases-2026" type="text"/>
 <div class="hint">
@@ -643,8 +687,12 @@ select.mi option{background:var(--s2);}
 <div class="modal">
 <div class="modal-title">💾 Guardar sesión</div>
 <div class="ml">Título de la clase</div>
-<input class="mi" id="sessTitle" placeholder="ej: Clase 1 – Introducción" type="text"/>
-<div class="row" style="margin-top:12px">
+<div style="display:flex;gap:8px;margin-bottom:4px">
+  <input class="mi" id="sessTitle" placeholder="ej: Clase 1 – Introducción" type="text" style="margin-bottom:0;flex:1"/>
+  <button class="btn btn-g" onclick="autoFillTitle()" style="flex-shrink:0;padding:11px 12px" title="Sugerir título con IA">✨</button>
+</div>
+<div style="font-size:10px;color:var(--muted);margin-bottom:12px">Toca ✨ para que la IA sugiera un título basado en el contenido</div>
+<div class="row" style="margin-top:4px">
 <button class="btn btn-g" onclick="saveSess(false)" style="flex:1">Sin título</button>
 <button class="btn btn-p" onclick="saveSess(true)" style="flex:2">Guardar</button>
 </div>
@@ -669,8 +717,10 @@ select.mi option{background:var(--s2);}
 const PROXY_BASE = 'https://clase-ai-proxy.kcautivof.workers.dev';
 const BUILTIN_API_KEY = ''; // proxy mode
 const TEXT_MODEL = 'gemini-2.5-flash';
-const AUDIO_MODEL = 'gemini-3.1-flash-lite-preview';
-const LIVE_MODEL = 'gemini-3.1-flash-live-preview';
+// NOTA: el Worker de Cloudflare debe mapear estas rutas al modelo correcto.
+// Si el Worker expone /v1/audio con gemini-2.5-flash o gemini-2.0-flash, ajustar aquí.
+const AUDIO_MODEL = 'gemini-2.5-flash'; // era 'gemini-3.1-flash-lite-preview' (no existe públicamente)
+const LIVE_MODEL  = 'gemini-2.0-flash-live-001'; // era 'gemini-3.1-flash-live-preview'
 const TEXT_REST_URL = ()=>`${PROXY_BASE}/v1/text`;
 const AUDIO_REST_URL = ()=>`${PROXY_BASE}/v1/audio`;
 const LIVE_WS_URL = ()=>''; // disabled in proxy mode
@@ -705,7 +755,24 @@ const S = {
 // ═══════════════════════════════════════════════════════════════
 const DB = {
   g(){return JSON.parse(localStorage.getItem('claseai')||'{"folders":[],"notebooks":[],"sessions":[]}');},
-  s(d){localStorage.setItem('claseai',JSON.stringify(d));},
+  s(d){
+    try{
+      const str=JSON.stringify(d);
+      localStorage.setItem('claseai',str);
+      // Indicador de uso
+      const kb=Math.round(str.length/1024);
+      const pct=Math.min(100,Math.round(kb/5120*100));
+      const el=document.getElementById('storageBar');
+      if(el){el.style.width=pct+'%';el.style.background=pct>80?'var(--red)':pct>60?'var(--yellow)':'var(--accent)';}
+      const lbl=document.getElementById('storageLbl');
+      if(lbl)lbl.textContent=`${kb} KB / 5 MB`;
+    }catch(e){
+      if(String(e).includes('QuotaExceeded')||String(e).includes('quota')){
+        alert('⚠️ Almacenamiento lleno (~5 MB).\nExporta un backup JSON y luego elimina sesiones antiguas desde cada cuaderno.');
+      }
+    }
+  },
+  usageKb(){try{const s=localStorage.getItem('claseai')||'';return Math.round(s.length/1024);}catch(e){return 0;}},
   uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,5);},
   folders(){return this.g().folders||[];},
   notebooks(fId){return(this.g().notebooks||[]).filter(n=>n.folderId===fId);},
@@ -872,11 +939,35 @@ function goSess(sessId){
   const sess=DB.sess(sessId);S.transcript=sess?.transcript||'';
   document.querySelectorAll('.tool-btn').forEach(b=>b.classList.remove('on'));
   document.getElementById('resultBox').className='result-box';
+  const actEl=document.getElementById('resultActions');if(actEl)actEl.style.display='none';
   document.getElementById('fcGrid').innerHTML='';
   document.getElementById('quizContainer').innerHTML='';
   document.getElementById('quizScore').style.display='none';
   document.getElementById('chatWrap').innerHTML='<div class="msg ai">¡Hola! Soy tu tutor. ¿Qué quieres repasar?</div>';
   showV('sess');stab('tools');renderBc();
+  renderSessStats(sess);
+}
+function renderSessStats(sess){
+  let bar=document.getElementById('sessStatsBar');
+  if(!bar){
+    bar=document.createElement('div');bar.id='sessStatsBar';
+    bar.style.cssText='display:flex;gap:14px;flex-wrap:wrap;padding:8px 12px;background:var(--s1);border:1px solid var(--border);border-radius:12px;font-size:11px;color:var(--muted);margin-bottom:4px;';
+    const tabRow=document.getElementById('sessTabs');
+    tabRow?.parentNode?.insertBefore(bar,tabRow);
+  }
+  const t=(sess?.transcript||'').trim();
+  const words=t?t.split(/\s+/).length:0;
+  const dur=sess?.duration?fmtDur(sess.duration):'—';
+  const date=sess?.createdAt?new Date(sess.createdAt).toLocaleDateString('es',{day:'numeric',month:'short',year:'numeric'}):'—';
+  const score=sess?.quizScore?`<span>📝 Quiz: <strong style="color:var(--a2)">${sess.quizScore.pct}%</strong></span>`:'';
+  const tools=Object.keys(sess?.results||{}).filter(k=>k!=='cards'&&k!=='quiz').length;
+  bar.innerHTML=`
+    <span>📅 ${date}</span>
+    <span>⏱ ${dur}</span>
+    <span>📝 ${words.toLocaleString('es')} palabras</span>
+    ${tools?`<span>✨ ${tools} generado${tools>1?'s':''}</span>`:''}
+    ${score}
+  `;
 }
 function renderBc(){
   const nb=DB.nb(S.nbId),sess=DB.sess(S.sessId);
@@ -969,7 +1060,47 @@ function renderLib(filter){
     g.appendChild(add);
   });
 }
-function filterLib(v){renderLib(v);}
+function filterLib(v){
+  const q=(v||'').trim().toLowerCase();
+  const gsr=document.getElementById('globalSearchResults');
+  if(q.length>=2){
+    // Buscar en sesiones de todos los cuadernos
+    const allSessions=DB.g().sessions||[];
+    const matches=allSessions.filter(s=>{
+      const t=(s.title||'').toLowerCase();
+      const c=(s.transcript||'').toLowerCase();
+      return t.includes(q)||c.includes(q);
+    }).slice(0,12);
+    if(matches.length){
+      const nb=(id)=>DB.nb((DB.g().sessions||[]).find(s=>s.id===id)?.notebookId||'');
+      gsr.style.display='block';
+      gsr.innerHTML=`<div class="sec-label">🔍 Sesiones encontradas (${matches.length})</div>`+
+        matches.map(s=>{
+          const n=DB.allNbs().find(n=>n.id===s.notebookId);
+          const excerpt=(s.transcript||'').toLowerCase().indexOf(q);
+          const ctx=excerpt>=0?'...'+s.transcript.slice(Math.max(0,excerpt-40),excerpt+80).replace(/\n/g,' ')+'...':'';
+          const hi=ctx.replace(new RegExp(q,'gi'),m=>`<mark style="background:rgba(124,111,255,.35);border-radius:3px">${m}</mark>`);
+          return `<div class="sess-card" onclick="S.nbId='${s.notebookId}';goSess('${s.id}')">
+            <div class="sess-icon">🎙️</div>
+            <div class="sess-info">
+              <div class="sess-title">${s.title||'Sin título'}</div>
+              <div class="sess-meta" style="color:var(--muted)">${n?.name||''} · ${new Date(s.createdAt).toLocaleDateString('es')}</div>
+              ${hi?`<div style="font-size:11px;color:var(--muted);margin-top:3px;line-height:1.5">${hi}</div>`:''}
+            </div>
+            <div class="sess-arrow">›</div>
+          </div>`;
+        }).join('');
+    } else {
+      gsr.style.display='block';
+      gsr.innerHTML=`<div class="empty-lib"><span>🔍</span>Sin resultados para "${v}"</div>`;
+    }
+    // Filtrar cuadernos en paralelo
+    renderLib(v);
+  } else {
+    gsr.style.display='none';
+    renderLib(v);
+  }
+}
 
 // ═══════════════════════════════════════════════════════════════
 //  NOTEBOOK RENDER
@@ -1005,12 +1136,13 @@ function renderSess(){
     ss.forEach(s=>{
       const words=s.transcript?.split(' ').length||0;
       const dur=s.duration?fmtDur(s.duration):'';
+      const score=s.quizScore?` · 📝 ${s.quizScore.pct}%`:'';
       const el=document.createElement('div');el.className='sess-card';
       el.innerHTML=`
         <div class="sess-icon">🎙️</div>
         <div class="sess-info">
           <div class="sess-title">${s.title||'Clase sin título'}</div>
-          <div class="sess-meta">${dur?dur+' · ':''}${words} palabras${Object.keys(s.results||{}).length?' · ✨ generado':''}</div>
+          <div class="sess-meta">${dur?dur+' · ':''}${words} palabras${Object.keys(s.results||{}).length?' · ✨ generado':''}${score}</div>
         </div>
         <div class="sess-arrow">›</div>`;
       el.onclick=()=>{S.nbId=S.nbId;goSess(s.id);};
@@ -1038,11 +1170,12 @@ function renderSrcs(){
 //  SESSION TABS
 // ═══════════════════════════════════════════════════════════════
 function stab(t){
-  ['tools','cards','quiz','chat','export'].forEach(x=>{
+  ['tools','cards','quiz','chat','transcript','export'].forEach(x=>{
     document.getElementById('sp-'+x).style.display=x===t?'block':'none';
     document.getElementById('st-'+x).classList.toggle('on',x===t);
     const bn=document.getElementById('bn-'+x);if(bn)bn.classList.toggle('on',x===t);
   });
+  if(t==='transcript') loadTranscriptEditor();
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -1707,53 +1840,160 @@ async function runTool(action){
   if(S.lastTool)document.getElementById('tb-'+S.lastTool)?.classList.remove('on');
   document.getElementById('tb-'+action)?.classList.add('on');S.lastTool=action;
   const box=document.getElementById('resultBox');box.className='result-box on';
+  const actEl=document.getElementById('resultActions');
   const cached=DB.sess(S.sessId)?.results?.[action];
   if(cached){
     S.lastResult=cached;
     box.innerHTML=marked.parse(cached);
+    if(actEl)actEl.style.display='flex';
     box.scrollIntoView({behavior:'smooth',block:'nearest'});
     return;
   }
+  if(actEl)actEl.style.display='none';
   box.innerHTML='<div class="loading"><div class="spin"></div>Generando con Gemini...</div>';
   try{
     const r=await callGemini(P[action](fullCtx()),{onRetry:(waitMs)=>{box.innerHTML=`<div class="loading"><div class="spin"></div>Esperando cupo de Gemini... ${Math.ceil(waitMs/1000)}s</div>`;}});
     S.lastResult=r;box.innerHTML=marked.parse(r);
     DB.updSess(S.sessId,{results:{...DB.sess(S.sessId)?.results,[action]:r}});
+    if(actEl)actEl.style.display='flex';
     box.scrollIntoView({behavior:'smooth',block:'nearest'});
   }catch(e){box.innerHTML=`<span style="color:var(--red)">Error: ${e.message}</span>`;}
+}
+function regenTool(){
+  if(!S.lastTool)return;
+  const sess=DB.sess(S.sessId);
+  if(sess?.results){
+    const newRes={...sess.results};
+    delete newRes[S.lastTool];
+    DB.updSess(S.sessId,{results:newRes});
+  }
+  const actEl=document.getElementById('resultActions');
+  if(actEl)actEl.style.display='none';
+  runTool(S.lastTool);
+}
+function copyResult(){
+  if(!S.lastResult)return;
+  navigator.clipboard.writeText(S.lastResult).then(()=>{
+    const btn=document.querySelector('#resultActions button');
+    if(btn){const orig=btn.textContent;btn.textContent='✅ Copiado';setTimeout(()=>btn.textContent=orig,1500);}
+  }).catch(()=>alert('No se pudo copiar automáticamente.'));
+}
+function copyTranscript(){
+  const t=DB.sess(S.sessId)?.transcript||getTranscriptText()||'';
+  navigator.clipboard.writeText(t).then(()=>{
+    const btn=document.querySelector('#sp-transcript .btn');
+    if(btn){const orig=btn.textContent;btn.textContent='✅ Copiado';setTimeout(()=>btn.textContent=orig,1500);}
+  }).catch(()=>alert('No se pudo copiar automáticamente.'));
+}
+async function shareContent(what){
+  const sess=DB.sess(S.sessId),nb=DB.nb(S.nbId);
+  const title=sess?.title||'Clase';
+  let text='';
+  if(what==='transcript')text=sess?.transcript||getTranscriptText()||'Sin transcripción';
+  else if(what==='result')text=S.lastResult||'Sin resultado generado';
+  else text=`${nb?.name||''} — ${title}\n\n${sess?.transcript||''}\n\n${S.lastResult||''}`;
+  if(navigator.share){
+    try{await navigator.share({title,text});}catch(e){}
+  } else {
+    navigator.clipboard.writeText(text).then(()=>alert('✅ Copiado al portapapeles (Web Share no disponible en este navegador)'));
+  }
+}
+function loadTranscriptEditor(){
+  const sess=DB.sess(S.sessId);
+  const txt=sess?.transcriptEdited||sess?.transcript||S.currentTranscriptEdited||getTranscriptText()||'';
+  const ta=document.getElementById('transcriptEditor');
+  if(ta){ta.value=txt;}
+  const words=txt.trim()?txt.trim().split(/\s+/).length:0;
+  const mins=Math.ceil(words/150);
+  const wcEl=document.getElementById('transcriptWordCount');
+  if(wcEl)wcEl.textContent=`${words} palabras · ~${mins} min lectura`;
+}
+function onTranscriptEdit(v){S.currentTranscriptEdited=v;}
+function saveTranscriptEdit(){
+  const v=(document.getElementById('transcriptEditor')?.value||'').trim();
+  if(!v)return;
+  DB.updSess(S.sessId,{transcriptEdited:v,transcript:v,updatedAt:Date.now()});
+  S.currentTranscriptEdited=v;
+  showBanner('✅ Transcripción guardada');
+}
+async function autoTitleSess(){
+  const txt=DB.sess(S.sessId)?.transcript||getTranscriptText()||'';
+  if(!txt.trim()){alert('Sin transcripción disponible');return;}
+  const btn=document.querySelector('#sp-transcript .btn-p:last-child');
+  if(btn){btn.textContent='✨ Generando...';btn.disabled=true;}
+  try{
+    const r=await callGemini(`Genera un título académico corto (máx 7 palabras) para esta clase o sesión. Solo el título, sin comillas ni puntuación final.\n\n${txt.slice(0,2000)}`);
+    const clean=r.replace(/^["']|["']$/g,'').trim();
+    DB.updSess(S.sessId,{title:clean});
+    renderBc();
+    showBanner(`✅ Título actualizado: ${clean}`);
+  }catch(e){showBanner('❌ Error generando título',false);}
+  if(btn){btn.textContent='✨ Auto-título';btn.disabled=false;}
 }
 
 async function loadCards(){
   if(!gk()||!getTranscriptText().trim()){alert('Necesitas key y transcripción');return;}
-  const g=document.getElementById('fcGrid');g.innerHTML='<div class="loading"><div class="spin"></div>Generando...</div>';
+  const g=document.getElementById('fcGrid');
+  // Check cache
+  const cached=DB.sess(S.sessId)?.results?.cards;
+  if(cached){renderCards(JSON.parse(cached),g);return;}
+  g.innerHTML='<div class="loading"><div class="spin"></div>Generando...</div>';
   try{
     let raw=await callGemini(P.cards(fullCtx()),{onRetry:(waitMs)=>{g.innerHTML=`<div class="loading"><div class="spin"></div>Esperando cupo... ${Math.ceil(waitMs/1000)}s</div>`;}});
     if(raw.includes('```'))raw=raw.split('\n').filter(l=>!l.startsWith('```')).join('\n').trim();
-    JSON.parse(raw).forEach(c=>{
-      const el=document.createElement('div');el.className='fc';
-      el.innerHTML=`<div class="fc-inner"><div class="fc-f"><span class="fc-lbl">Pregunta</span>${c.q}</div><div class="fc-b"><span class="fc-lbl">Respuesta</span>${c.a}</div></div>`;
-      el.onclick=()=>el.classList.toggle('flip');g.appendChild(el);
-    });
+    const cards=JSON.parse(raw);
+    DB.updSess(S.sessId,{results:{...DB.sess(S.sessId)?.results,cards:JSON.stringify(cards)}});
+    renderCards(cards,g);
     g.querySelector('.loading')?.remove();
   }catch(e){g.innerHTML=`<span style="color:var(--red)">${e.message}</span>`;}
+}
+function renderCards(cards,g){
+  g.innerHTML='';
+  cards.forEach(c=>{
+    const el=document.createElement('div');el.className='fc';
+    el.innerHTML=`<div class="fc-inner"><div class="fc-f"><span class="fc-lbl">Pregunta</span>${c.q}</div><div class="fc-b"><span class="fc-lbl">Respuesta</span>${c.a}</div></div>`;
+    el.onclick=()=>el.classList.toggle('flip');g.appendChild(el);
+  });
 }
 
 async function loadQuiz(){
   if(!gk()||!getTranscriptText().trim()){alert('Necesitas key y transcripción');return;}
   const c=document.getElementById('quizContainer');document.getElementById('quizScore').style.display='none';
+  // Check cache
+  const cached=DB.sess(S.sessId)?.results?.quiz;
+  if(cached){
+    try{S.qAns=[];S.qOk=0;c.innerHTML='';renderQuiz(JSON.parse(cached),c);return;}catch(e){}
+  }
   c.innerHTML='<div class="loading"><div class="spin"></div>Generando...</div>';S.qAns=[];S.qOk=0;
   try{
     let raw=await callGemini(P.quiz(fullCtx()),{onRetry:(waitMs)=>{c.innerHTML=`<div class="loading"><div class="spin"></div>Esperando cupo... ${Math.ceil(waitMs/1000)}s</div>`;}});
     if(raw.includes('```'))raw=raw.split('\n').filter(l=>!l.startsWith('```')).join('\n').trim();
-    const qs=JSON.parse(raw);S.qAns=new Array(qs.length).fill(-1);c.innerHTML='';
-    qs.forEach((q,qi)=>{
-      const el=document.createElement('div');el.className='quiz-card';
-      el.innerHTML=`<div class="quiz-num">Pregunta ${qi+1}/${qs.length}</div><div class="quiz-q">${q.question}</div>
-        <div class="quiz-opts" id="qo${qi}">${q.options.map((o,oi)=>`<button class="quiz-opt" onclick="ansQ(${qi},${oi},${q.correct})">${String.fromCharCode(65+oi)}. ${o}</button>`).join('')}</div>
-        <div class="quiz-exp" id="qe${qi}">${q.explanation}</div>`;
-      c.appendChild(el);
-    });
+    const qs=JSON.parse(raw);
+    DB.updSess(S.sessId,{results:{...DB.sess(S.sessId)?.results,quiz:JSON.stringify(qs)}});
+    c.innerHTML='';renderQuiz(qs,c);
   }catch(e){c.innerHTML=`<span style="color:var(--red)">${e.message}</span>`;}
+}
+function renderQuiz(qs,c){
+  S.qAns=new Array(qs.length).fill(-1);
+  qs.forEach((q,qi)=>{
+    const el=document.createElement('div');el.className='quiz-card';
+    el.innerHTML=`<div class="quiz-num">Pregunta ${qi+1}/${qs.length}</div><div class="quiz-q">${q.question}</div>
+      <div class="quiz-opts" id="qo${qi}">${q.options.map((o,oi)=>`<button class="quiz-opt" onclick="ansQ(${qi},${oi},${q.correct})">${String.fromCharCode(65+oi)}. ${o}</button>`).join('')}</div>
+      <div class="quiz-exp" id="qe${qi}">${q.explanation}</div>`;
+    c.appendChild(el);
+  });
+}
+function regenCards(){
+  const sess=DB.sess(S.sessId);
+  if(sess?.results){const r={...sess.results};delete r.cards;DB.updSess(S.sessId,{results:r});}
+  document.getElementById('fcGrid').innerHTML='';
+  loadCards();
+}
+function regenQuiz(){
+  const sess=DB.sess(S.sessId);
+  if(sess?.results){const r={...sess.results};delete r.quiz;DB.updSess(S.sessId,{results:r});}
+  document.getElementById('quizContainer').innerHTML='';
+  loadQuiz();
 }
 function ansQ(qi,oi,correct){
   if(S.qAns[qi]!==-1)return;S.qAns[qi]=oi;
@@ -1762,6 +2002,8 @@ function ansQ(qi,oi,correct){
   if(S.qAns.every(a=>a!==-1)){
     const pct=Math.round(S.qOk/S.qAns.length*100),em=pct>=80?'🏆':pct>=60?'👍':'📚';
     const sc=document.getElementById('quizScore');sc.innerHTML=`<div class="score-banner">${em} ${S.qOk}/${S.qAns.length} — ${pct}%</div>`;sc.style.display='block';sc.scrollIntoView({behavior:'smooth',block:'nearest'});
+    // Guardar score en DB
+    DB.updSess(S.sessId,{quizScore:{pct,ok:S.qOk,total:S.qAns.length,date:Date.now()}});
   }
 }
 
@@ -1845,16 +2087,17 @@ function xport(what,fmt){
   const sess=DB.sess(S.sessId),nb=DB.nb(S.nbId);
   const title=sess?.title||'Clase',date=new Date(sess?.createdAt||Date.now()).toLocaleDateString('es');
   let txt='';
-  if(what==='transcript')txt=getTranscriptText()||'Sin transcripción';
+  if(what==='transcript')txt=sess?.transcriptEdited||sess?.transcript||getTranscriptText()||'Sin transcripción';
   else if(what==='result')txt=S.lastResult||'Sin resultado generado';
   else{
-    txt=`${nb?.name||''} — ${title} (${date})\n${'═'.repeat(50)}\n\nTRANSCRIPCIÓN\n${'─'.repeat(30)}\n${S.transcript||''}`;
-    if(S.lastResult)txt+=`\n\nRESULTADO GENERADO\n${'─'.repeat(30)}\n${S.lastResult}`;
+    txt=`# ${nb?.name||''} — ${title}\n*${date}*\n\n---\n\n## Transcripción\n\n${sess?.transcript||''}\n`;
+    if(S.lastResult)txt+=`\n---\n\n## Resultado generado\n\n${S.lastResult}`;
     const srcs=DB.sources(S.nbId);
-    if(srcs.length)txt+=`\n\nFUENTES (${srcs.length})\n${'─'.repeat(30)}\n`+srcs.map(s=>`[${s.type}] ${s.name}`).join('\n');
+    if(srcs.length)txt+=`\n\n---\n\n## Fuentes (${srcs.length})\n\n`+srcs.map(s=>`- **[${s.type}]** ${s.name}`).join('\n');
   }
   const fn=title.replace(/[^a-z0-9áéíóúñ\s]/gi,'_');
   if(fmt==='txt'){dl(txt,fn+'.txt','text/plain');}
+  else if(fmt==='md'){dl(txt,fn+'.md','text/markdown');}
   else{
     const body=what==='result'?marked.parse(txt||''):txt.replace(/\n/g,'<br/>');
     const w=`<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word'><head><meta charset='utf-8'/><style>body{font-family:Calibri;font-size:11pt;line-height:1.6;margin:2cm}h1,h2{color:#7c6fff}h2{font-size:14pt;margin-top:12pt}table{width:100%;border-collapse:collapse}th{background:#ede9ff;padding:6pt}td{padding:5pt;border-bottom:1pt solid #ddd}.hdr{background:#7c6fff;color:#fff;padding:12pt;margin-bottom:14pt;border-radius:4pt}</style></head><body><div class="hdr"><h1>${title}</h1><p>${nb?.name||''} · ${date}</p></div>${body}</body></html>`;
@@ -1950,11 +2193,30 @@ async function cloudSync(){
 // ═══════════════════════════════════════════════════════════════
 //  INIT
 // ═══════════════════════════════════════════════════════════════
+async function autoFillTitle(){
+  const btn=document.querySelector('#m-save .btn-g:last-of-type');
+  const txt=getTranscriptText()||'';
+  if(!txt.trim()){document.getElementById('sessTitle').placeholder='Sin transcripción para analizar';return;}
+  if(btn){btn.textContent='⏳';btn.disabled=true;}
+  try{
+    const r=await callGemini(`Genera un título académico corto (máx 7 palabras) para esta clase. Solo el título, sin comillas ni puntuación final.\n\n${txt.slice(0,2000)}`);
+    document.getElementById('sessTitle').value=r.replace(/^["']|["']$/g,'').trim();
+  }catch(e){}
+  if(btn){btn.textContent='✨';btn.disabled=false;}
+}
+
 window.addEventListener('load',()=>{
   if(window.pdfjsLib)pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
   document.getElementById('keyBtn').textContent='☁️';
   document.getElementById('apiIn').value=PROXY_BASE;
   resetRecState();
+  // Inicializar indicador de storage
+  try{
+    const kb=DB.usageKb();
+    const pct=Math.min(100,Math.round(kb/5120*100));
+    const el=document.getElementById('storageBar');if(el){el.style.width=pct+'%';el.style.background=pct>80?'var(--red)':pct>60?'var(--yellow)':'var(--accent)';}
+    const lbl=document.getElementById('storageLbl');if(lbl)lbl.textContent=`${kb} KB / 5 MB`;
+  }catch(e){}
   // Demo data on first run
   if(!DB.folders().length){
     const f=DB.mkFolder('2026 – Semestre 1',COLORS[0]);
@@ -1966,6 +2228,467 @@ window.addEventListener('load',()=>{
   const fbcfg=localStorage.getItem('claseai_fb_config');
   if(code&&fbcfg)setTimeout(cloudSync,2000);
 });
+
+// ═══════════════════════════════════════════════════════════════
+//  ENHANCEMENTS V2 — study-focused workflow
+// ═══════════════════════════════════════════════════════════════
+const SESSION_MODES = [
+  {id:'clase', label:'Clase', icon:'🎓'},
+  {id:'reunion', label:'Reunión', icon:'🤝'},
+  {id:'entrevista', label:'Entrevista', icon:'🎤'},
+  {id:'idea', label:'Idea rápida', icon:'⚡'}
+];
+S.sessionMode = localStorage.getItem('claseai_session_mode') || 'clase';
+S.currentTranscriptRaw = '';
+S.currentTranscriptEdited = '';
+S.recordStartedAt = null;
+S.lastTranscriptGeneratedAt = null;
+
+function modeMeta(id){ return SESSION_MODES.find(x=>x.id===id) || SESSION_MODES[0]; }
+function sessionModeLabel(id){ const m=modeMeta(id); return `${m.icon} ${m.label}`; }
+function saveSessionMode(id){
+  S.sessionMode=id;
+  localStorage.setItem('claseai_session_mode', id);
+  renderModeSelector();
+  renderTranscript();
+}
+function autosaveDraft(){
+  try{
+    const payload = {
+      nbId:S.nbId,
+      transcript:S.transcript||'',
+      liveTurnText:S.liveTurnText||'',
+      secs:S.secs||0,
+      mode:S.sessionMode||'clase',
+      updatedAt:Date.now()
+    };
+    localStorage.setItem('claseai_recording_draft', JSON.stringify(payload));
+  }catch(e){}
+}
+function clearDraft(){
+  try{ localStorage.removeItem('claseai_recording_draft'); }catch(e){}
+}
+function getApproxTimestamps(text, totalSecs){
+  const cleaned=(text||'').trim();
+  if(!cleaned) return [];
+  const parts=cleaned
+    .split(/\n{2,}|(?<=[\.\?\!])\s+(?=[A-ZÁÉÍÓÚÑ0-9])/)
+    .map(s=>s.trim())
+    .filter(Boolean);
+  const chunks=[];
+  let current='';
+  for(const p of parts){
+    if((current+' '+p).trim().length<260) current=(current?current+' ':'')+p;
+    else{
+      chunks.push(current.trim());
+      current=p;
+    }
+  }
+  if(current.trim()) chunks.push(current.trim());
+  const n=Math.max(chunks.length,1);
+  const dur=Math.max(totalSecs||0,1);
+  return chunks.slice(0,8).map((chunk,i)=>{
+    const start=Math.round((dur*i)/n);
+    const end=Math.round((dur*(i+1))/n)-1;
+    return {start,end:Math.max(start,end),text:chunk};
+  });
+}
+function fmtTs(sec){
+  sec=Math.max(0,Math.round(sec||0));
+  const h=Math.floor(sec/3600),m=Math.floor((sec%3600)/60),s=sec%60;
+  return h?`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`:`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+}
+function buildTranscriptWithTimestamps(text, secs){
+  const rows=getApproxTimestamps(text, secs);
+  if(!rows.length) return text||'';
+  return rows.map(r=>`[${fmtTs(r.start)}–${fmtTs(r.end)}] ${r.text}`).join('\n\n');
+}
+function setCurrentTranscriptEdited(v){
+  S.currentTranscriptEdited = v || '';
+  const ta=document.getElementById('transcriptEditor');
+  if(ta && ta.value!==S.currentTranscriptEdited) ta.value=S.currentTranscriptEdited;
+}
+function getCombinedTranscript(){
+  const edited=(S.currentTranscriptEdited||'').trim();
+  const raw=(S.currentTranscriptRaw||'').trim();
+  const base=(getTranscriptText()||'').trim();
+  return edited || raw || base || '';
+}
+function buildModeContext(){
+  const mode = modeMeta(S.sessionMode);
+  const profile = {
+    clase:'Prioriza conceptos, explicaciones, relaciones entre temas y posibles contenidos evaluables.',
+    reunion:'Prioriza decisiones, acuerdos, tareas, responsables, pendientes y próximos pasos.',
+    entrevista:'Prioriza preguntas, respuestas relevantes, hallazgos, perfil y citas importantes.',
+    idea:'Prioriza ideas accionables, síntesis corta, oportunidades, riesgos y próximos pasos.'
+  };
+  return `MODO DE SESIÓN: ${mode.label}. ${profile[S.sessionMode]||profile.clase}`;
+}
+function injectEnhancementUI(){
+  const recHero=document.querySelector('#v-rec .rec-hero');
+  if(recHero && !document.getElementById('modeSelectorWrap')){
+    const wrap=document.createElement('div');
+    wrap.id='modeSelectorWrap';
+    wrap.style.cssText='width:100%;display:flex;flex-direction:column;gap:10px;align-items:center;margin-top:6px;';
+    wrap.innerHTML=`
+      <div style="font-size:11px;color:var(--muted);font-weight:700">Modo de sesión</div>
+      <div id="modeSelector" style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center"></div>
+      <div style="font-size:11px;color:var(--muted);text-align:center;line-height:1.6;max-width:320px">La transcripción se limpia al finalizar. El modo ajusta el tipo de resumen y análisis.</div>
+    `;
+    const recLabel=document.getElementById('recLabel');
+    recHero.insertBefore(wrap, recLabel.nextSibling);
+  }
+
+  const toolGrid=document.querySelector('#sp-tools .tools-grid');
+  if(toolGrid && !document.getElementById('tb-layered_summary')){
+    toolGrid.insertAdjacentHTML('beforeend', `
+      <div class="tool-btn" id="tb-clean_notes" onclick="runTool('clean_notes')"><span class="ti">🧾</span>Apuntes limpios</div>
+      <div class="tool-btn" id="tb-layered_summary" onclick="runTool('layered_summary')"><span class="ti">🪜</span>Resumen por capas</div>
+      <div class="tool-btn" id="tb-key_concepts" onclick="runTool('key_concepts')"><span class="ti">🔑</span>Conceptos clave</div>
+      <div class="tool-btn" id="tb-exam_focus" onclick="runTool('exam_focus')"><span class="ti">🎯</span>Qué entra</div>
+    `);
+  }
+
+  const tabs=document.getElementById('sessTabs');
+  if(tabs && !document.getElementById('st-text')){
+    const textTab=document.createElement('div');
+    textTab.className='tab';
+    textTab.id='st-text';
+    textTab.setAttribute('onclick',"stab('text')");
+    textTab.textContent='🧾';
+    tabs.insertBefore(textTab, document.getElementById('st-export'));
+  }
+
+  const exportPanel=document.getElementById('sp-export');
+  if(exportPanel && !document.getElementById('sp-text')){
+    const panel=document.createElement('div');
+    panel.id='sp-text';
+    panel.style.display='none';
+    panel.innerHTML=`
+      <div class="sec-label" style="margin-bottom:10px">Transcripción editable</div>
+      <div style="font-size:11px;color:var(--muted);line-height:1.7;margin-bottom:10px">
+        Puedes corregir la transcripción antes de generar resumen, preguntas o tutor. Si no la editas, la app usa la versión automática.
+      </div>
+      <textarea id="transcriptEditor" class="mi" style="min-height:260px;margin-bottom:10px"></textarea>
+      <div class="row" style="margin-bottom:10px">
+        <button class="btn btn-g" style="flex:1" onclick="restoreRawTranscript()">Restaurar auto</button>
+        <button class="btn btn-g" style="flex:1" onclick="insertEstimatedTimestamps()">Timestamps</button>
+      </div>
+      <div class="row">
+        <button class="btn btn-p" style="flex:2" onclick="saveTranscriptEdits()">Guardar texto</button>
+      </div>
+      <div id="textEditorStatus" style="font-size:11px;color:var(--muted);margin-top:10px"></div>
+    `;
+    exportPanel.parentNode.insertBefore(panel, exportPanel);
+  }
+
+  renderModeSelector();
+}
+function renderModeSelector(){
+  const c=document.getElementById('modeSelector');
+  if(!c) return;
+  c.innerHTML='';
+  SESSION_MODES.forEach(m=>{
+    const on = S.sessionMode===m.id;
+    const b=document.createElement('button');
+    b.className='btn ' + (on?'btn-p':'btn-g');
+    b.style.cssText='padding:9px 12px;border-radius:999px;font-size:12px';
+    b.textContent=`${m.icon} ${m.label}`;
+    b.onclick=()=>saveSessionMode(m.id);
+    c.appendChild(b);
+  });
+}
+function renderTextEditor(){
+  const ta=document.getElementById('transcriptEditor');
+  if(!ta) return;
+  const sess=DB.sess(S.sessId);
+  S.currentTranscriptRaw = (sess?.transcriptRaw || sess?.transcript || S.transcript || '').trim();
+  S.currentTranscriptEdited = (sess?.transcriptEdited || '').trim();
+  ta.value = S.currentTranscriptEdited || S.currentTranscriptRaw || '';
+  const st=document.getElementById('textEditorStatus');
+  if(st){
+    const mode = sess?.mode ? sessionModeLabel(sess.mode) : sessionModeLabel(S.sessionMode);
+    st.textContent = `Modo: ${mode} · Duración: ${fmtDur(sess?.duration||S.secs||0)} · Puedes corregir antes de regenerar resultados.`;
+  }
+}
+function saveTranscriptEdits(){
+  const ta=document.getElementById('transcriptEditor');
+  if(!ta || !S.sessId) return;
+  const edited=(ta.value||'').trim();
+  S.currentTranscriptEdited = edited;
+  DB.updSess(S.sessId,{
+    transcriptEdited: edited,
+    transcript: edited || DB.sess(S.sessId)?.transcript || '',
+    updatedAt: Date.now()
+  });
+  const st=document.getElementById('textEditorStatus');
+  if(st) st.textContent='Texto guardado. Los nuevos resúmenes usarán esta versión.';
+  renderBc();
+}
+function restoreRawTranscript(){
+  const sess=DB.sess(S.sessId);
+  const raw = (sess?.transcriptRaw || sess?.transcript || '').trim();
+  setCurrentTranscriptEdited(raw);
+  const st=document.getElementById('textEditorStatus');
+  if(st) st.textContent='Se restauró la transcripción automática.';
+}
+function insertEstimatedTimestamps(){
+  const ta=document.getElementById('transcriptEditor');
+  const sess=DB.sess(S.sessId);
+  const raw=(ta?.value || sess?.transcriptEdited || sess?.transcriptRaw || sess?.transcript || '').trim();
+  const withTs=buildTranscriptWithTimestamps(raw, sess?.duration||S.secs||0);
+  setCurrentTranscriptEdited(withTs);
+  const st=document.getElementById('textEditorStatus');
+  if(st) st.textContent='Se insertaron timestamps estimados por bloques.';
+}
+
+// Extend prompts
+Object.assign(P,{
+  clean_notes:c=>`${QUALITY_RULES}
+${buildModeContext()}
+Convierte esta transcripción oral en apuntes limpios, claros y académicos.
+Formato exacto:
+# Apuntes limpios
+## Tema central
+## Desarrollo por bloques
+- bloque 1:
+- bloque 2:
+- bloque 3:
+## Términos y definiciones
+## Datos, nombres o fechas mencionados
+## Cierre breve
+\n${c}`,
+  layered_summary:c=>`${QUALITY_RULES}
+${buildModeContext()}
+Genera un resumen por capas para estudiar rápido y luego profundizar.
+Formato exacto:
+# Resumen por capas
+## En 3 líneas
+## En 8 viñetas
+## Desarrollo breve
+## Conclusión final
+## Dudas o vacíos detectados
+\n${c}`,
+  key_concepts:c=>`${QUALITY_RULES}
+${buildModeContext()}
+Extrae solo los conceptos realmente presentes en el material.
+Formato exacto:
+# Conceptos clave
+## Lista principal
+- concepto:
+- definición o explicación:
+- por qué importa:
+## Relaciones entre conceptos
+## Posibles confusiones
+\n${c}`,
+  exam_focus:c=>`${QUALITY_RULES}
+${buildModeContext()}
+Genera una guía de 'qué podría entrar' sin inventar.
+Formato exacto:
+# Posibles contenidos evaluables
+## Qué parece más preguntable
+- punto:
+- por qué podría entrar:
+## Comparaciones o relaciones importantes
+## Errores o trampas probables
+## Mini repaso final
+\n${c}`
+});
+
+const oldStab = stab;
+stab = function(t){
+  oldStab(t);
+  ['text'].forEach(x=>{
+    const el=document.getElementById('sp-'+x); if(el) el.style.display = x===t ? 'block' : 'none';
+    const tab=document.getElementById('st-'+x); if(tab) tab.classList.toggle('on', x===t);
+    const bn=document.getElementById('bn-'+x); if(bn) bn.classList.toggle('on', x===t);
+  });
+  if(t==='text') renderTextEditor();
+};
+
+const oldRunTool = runTool;
+runTool = async function(action){
+  if(action && ['summary','outline','questions','mindmap','presentation','report','infographic','datatable','clean_notes','layered_summary','key_concepts','exam_focus'].includes(action)){
+    const sess=DB.sess(S.sessId);
+    if(sess?.transcriptEdited){
+      S.currentTranscriptEdited = sess.transcriptEdited;
+    }
+  }
+  return oldRunTool(action);
+};
+
+const oldGoSess = goSess;
+goSess = function(sessId){
+  oldGoSess(sessId);
+  const sess=DB.sess(sessId);
+  S.sessionMode = sess?.mode || localStorage.getItem('claseai_session_mode') || 'clase';
+  S.currentTranscriptRaw = (sess?.transcriptRaw || sess?.transcript || '').trim();
+  S.currentTranscriptEdited = (sess?.transcriptEdited || '').trim();
+  renderModeSelector();
+};
+
+const oldSaveSess = saveSess;
+saveSess = function(useTitle){
+  const title=useTitle?document.getElementById('sessTitle').value.trim()||'Clase sin título':'Clase '+new Date().toLocaleDateString('es',{day:'numeric',month:'short'});
+  document.getElementById('m-save').classList.remove('on');
+  let transcriptText=getTranscriptText();
+  if(!transcriptText.trim()) transcriptText='[Sesión guardada sin transcripción automática]';
+  const sess=DB.mkSess(S.nbId,title,transcriptText);
+  const transcriptWithTs = buildTranscriptWithTimestamps(transcriptText, S.secs||0);
+  DB.updSess(sess.id,{
+    mode:S.sessionMode,
+    transcriptRaw: transcriptText,
+    transcriptEdited: transcriptWithTs,
+    transcript: transcriptWithTs || transcriptText,
+    createdFrom:'enhanced_v2',
+    updatedAt:Date.now()
+  });
+  clearDraft();
+  S.sessId=sess.id;
+  goSess(sess.id);
+};
+
+const oldRenderBc = renderBc;
+renderBc = function(){
+  oldRenderBc();
+  const sess=DB.sess(S.sessId);
+  const bc=document.getElementById('bc');
+  if(bc && sess?.mode && !bc.innerHTML.includes('mode-badge')){
+    bc.innerHTML += ` <span class="bc-sep">·</span><span class="bc cur mode-badge">${sessionModeLabel(sess.mode)}</span>`;
+  }
+};
+
+const oldRenderSess = renderSess;
+renderSess = function(){
+  oldRenderSess();
+  const c=document.getElementById('sessList');
+  if(!c) return;
+  c.querySelectorAll('.sess-card').forEach(card=>{
+    const titleEl=card.querySelector('.sess-title');
+    if(!titleEl) return;
+    const title=titleEl.textContent.trim();
+    const sess=DB.sessions(S.nbId).find(s=>(s.title||'Clase sin título')===title);
+    if(sess?.mode){
+      const meta=card.querySelector('.sess-meta');
+      if(meta && !meta.textContent.includes(modeMeta(sess.mode).label)) meta.textContent += ` · ${modeMeta(sess.mode).label}`;
+    }
+  });
+};
+
+const oldRenderTranscript = renderTranscript;
+renderTranscript = function(){
+  oldRenderTranscript();
+  const box=document.getElementById('liveBox');
+  if(!box) return;
+  const modeTxt=sessionModeLabel(S.sessionMode);
+  if(box.innerHTML && !box.innerHTML.includes('Modo de sesión')){
+    const html = box.innerHTML;
+    box.innerHTML = html.replace('</div></div></div>', '');
+    // rebuild safer
+    const transcriptText=(getTranscriptText()||'').trim();
+    let audioState='Listo para grabar';
+    if(S.pendingStop) audioState='Procesando transcripción...';
+    else if(S.isRec && S.isPaused) audioState='Pausado';
+    else if(S.isRec) audioState='Grabando audio...';
+    let transcriptState='Pendiente';
+    if(transcriptText) transcriptState='Disponible';
+    if(S.pendingStop) transcriptState='Procesando';
+    const lines = [
+      ['Audio', audioState],
+      ['Duración', document.getElementById('recTimer')?.textContent || '00:00'],
+      ['Transcripción', transcriptState],
+      ['Modo', modeTxt],
+      ['Última acción', S.pendingStop ? 'Procesando al detener' : (S.isRec ? 'Grabación activa' : 'Esperando inicio')]
+    ];
+    box.innerHTML = `<div style="display:flex;flex-direction:column;gap:10px">${lines.map(([a,b])=>`<div style="display:flex;justify-content:space-between;gap:12px"><strong style="color:var(--a2);font-size:12px">${a}</strong><span style="text-align:right;font-size:12px;color:var(--text)">${b}</span></div>`).join('')}
+      <div style="margin-top:8px;font-size:11px;color:var(--muted);line-height:1.7">La transcripción se limpia al finalizar la grabación. Modo actual: ${modeTxt}.</div>
+    </div>`;
+  }
+};
+
+const oldGetCombinedTranscript = getCombinedTranscript;
+getCombinedTranscript = function(){
+  const sess=DB.sess(S.sessId);
+  const edited=(sess?.transcriptEdited || S.currentTranscriptEdited || '').trim();
+  const raw=(sess?.transcriptRaw || S.currentTranscriptRaw || '').trim();
+  const base=(getTranscriptText()||'').trim();
+  return `${buildModeContext()}\n\nTRANSCRIPCIÓN BASE:\n${edited || raw || base || ''}`;
+};
+
+const oldSendChat = sendChat;
+sendChat = async function(){
+  const sess=DB.sess(S.sessId);
+  if(sess?.transcriptEdited) S.currentTranscriptEdited = sess.transcriptEdited;
+  return oldSendChat();
+};
+
+const oldStartRec = startRec;
+startRec = async function(reconnect=false){
+  if(!reconnect){
+    S.recordStartedAt=Date.now();
+    S.currentTranscriptRaw='';
+    S.currentTranscriptEdited='';
+  }
+  const res = await oldStartRec(reconnect);
+  autosaveDraft();
+  return res;
+};
+const oldPauseRec = pauseRec;
+pauseRec = function(){ const r=oldPauseRec(); autosaveDraft(); return r; };
+const oldStopRec = stopRec;
+stopRec = function(){ autosaveDraft(); return oldStopRec(); };
+
+const oldFinishRec = finishRec;
+finishRec = function(){
+  const r=oldFinishRec();
+  autosaveDraft();
+  return r;
+};
+
+const oldResetRecState = resetRecState;
+resetRecState = function(){
+  const r = oldResetRecState();
+  renderModeSelector();
+  return r;
+};
+
+const oldGetTranscriptText = getTranscriptText;
+getTranscriptText = function(){
+  const txt = oldGetTranscriptText();
+  S.currentTranscriptRaw = txt || S.currentTranscriptRaw || '';
+  return txt;
+};
+
+const oldXport = xport;
+xport = function(what,fmt){
+  if(what==='all' || what==='transcript'){
+    const sess=DB.sess(S.sessId);
+    if(sess?.transcriptEdited) S.currentTranscriptEdited=sess.transcriptEdited;
+  }
+  return oldXport(what,fmt);
+};
+
+const oldWindowLoadFns = [];
+window.addEventListener('load', ()=>{
+  injectEnhancementUI();
+  renderModeSelector();
+  const draftRaw = localStorage.getItem('claseai_recording_draft');
+  if(draftRaw && !S.isRec){
+    try{
+      const draft=JSON.parse(draftRaw);
+      if(draft && draft.transcript){
+        S.transcript = draft.transcript;
+        S.liveTurnText = draft.liveTurnText || '';
+        S.secs = draft.secs || 0;
+        S.sessionMode = draft.mode || S.sessionMode;
+        updTimer();
+        renderModeSelector();
+        renderTranscript();
+      }
+    }catch(e){}
+  }
+});
+
 </script>
 </body>
 </html>
