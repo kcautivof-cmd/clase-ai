@@ -1059,18 +1059,30 @@ function renderSessStats(sess){
     tabRow?.parentNode?.insertBefore(bar,tabRow);
   }
   const t=(sess?.transcript||'').trim();
-  const words=t?t.split(/\s+/).length:0;
+  const effectiveTxt = getEffectiveTranscript();
+  const isEmpty = !effectiveTxt;
+  const words=effectiveTxt?effectiveTxt.split(/\s+/).length:0;
   const dur=sess?.duration?fmtDur(sess.duration):'—';
   const date=sess?.createdAt?new Date(sess.createdAt).toLocaleDateString('es',{day:'numeric',month:'short',year:'numeric'}):'—';
   const score=sess?.quizScore?`<span>📝 Quiz: <strong style="color:var(--a2)">${sess.quizScore.pct}%</strong></span>`:'';
   const tools=Object.keys(sess?.results||{}).filter(k=>k!=='cards'&&k!=='quiz').length;
-  bar.innerHTML=`
-    <span>📅 ${date}</span>
-    <span>⏱ ${dur}</span>
-    <span>📝 ${words.toLocaleString('es')} palabras</span>
-    ${tools?`<span>✨ ${tools} generado${tools>1?'s':''}</span>`:''}
-    ${score}
-  `;
+
+  if(isEmpty){
+    bar.innerHTML=`
+      <div style="width:100%;background:rgba(234,179,8,.08);border:1px solid rgba(234,179,8,.35);border-radius:10px;padding:10px 12px">
+        <div style="color:var(--yellow);font-weight:800;font-size:12px;margin-bottom:4px">⚠️ Sin transcripción</div>
+        <div style="color:var(--muted);font-size:11px;line-height:1.6;margin-bottom:8px">La transcripción automática no se generó. Puedes escribirla manualmente para usar todas las herramientas IA.</div>
+        <button class="btn btn-p" onclick="stab('transcript')" style="font-size:11px;padding:7px 14px;width:100%">✏️ Añadir transcripción manualmente</button>
+      </div>`;
+  } else {
+    bar.innerHTML=`
+      <span>📅 ${date}</span>
+      <span>⏱ ${dur}</span>
+      <span>📝 ${words.toLocaleString('es')} palabras</span>
+      ${tools?`<span>✨ ${tools} generado${tools>1?'s':''}</span>`:''}
+      ${score}
+    `;
+  }
 }
 function renderBc(){
   const nb=DB.nb(S.nbId),sess=DB.sess(S.sessId);
@@ -1751,8 +1763,14 @@ async function processTranscribeQueue(){
     else if(S.isRec)setLabel(S.deferGeminiTranscription?'Grabando localmente...':'Grabando (modo alterno)...');
   }catch(e){
     console.error('Transcription error',e);
-    setPill('Error','warn');
-    setLabel('Error al transcribir un bloque, la grabación sigue');
+    const isHighDemand = e.message?.toLowerCase().includes('high demand') || e.message?.toLowerCase().includes('saturad');
+    setPill(isHighDemand ? 'Audio saturado' : 'Error audio','warn');
+    setLabel(isHighDemand
+      ? '⚠️ Modelo de audio saturado — el bloque no se transcribió. Al detener, guarda y añade el texto manualmente.'
+      : '⚠️ Error al transcribir un bloque — la grabación continúa'
+    );
+    // Marcar que hubo fallos de transcripción
+    S._transcriptionErrors = (S._transcriptionErrors||0)+1;
   }finally{
     S.transcribing=false;
     if(S.isRec&&!S.pendingStop)setPill(S.liveFallback?'Modo alterno':'Grabando',S.liveFallback?'warn':'rec');
@@ -1944,6 +1962,17 @@ function finishRec(){
   renderTranscript();
   setPill('Listo','ok');
   setLabel('Grabación terminada ✓');
+  // Avisar si hubo errores de transcripción
+  if(S._transcriptionErrors > 0){
+    const isEmpty = isTranscriptEmpty(S.transcript);
+    if(isEmpty){
+      setLabel('⚠️ Grabación guardada — transcripción falló. Añádela manualmente en el tab Texto.');
+      setPill('Sin texto','warn');
+    } else {
+      setLabel(`✓ Grabado — ${S._transcriptionErrors} bloque(s) sin transcribir por saturación`);
+    }
+    S._transcriptionErrors = 0;
+  }
   document.getElementById('sessTitle').value='Clase '+new Date().toLocaleDateString('es',{day:'numeric',month:'short'});
   document.getElementById('m-save').classList.add('on');
 }
@@ -1966,7 +1995,8 @@ function saveSess(useTitle){
 function fullCtx(){
   const srcs=DB.sources(S.nbId);
   const extra=srcs.length?'\n\nFUENTES DEL CUADERNO:\n'+srcs.map(s=>`[${s.type.toUpperCase()}: ${s.name}]\n${(s.content||'').slice(0,3000)}`).join('\n\n'):'';
-  return getCombinedTranscript()+extra;
+  const transcript = getEffectiveTranscript() || getCombinedTranscript();
+  return transcript + extra;
 }
 async function callGemini(prompt,{onRetry}={}){
   const d=await geminiJsonFetch(TEXT_REST_URL(),{generationConfig:{temperature:0.22},contents:[{parts:[{text:prompt}]}]},{retries:2,onRetry});
@@ -2263,9 +2293,63 @@ ${c}
 PREGUNTA: ${q}`
 };
 
+const TRANSCRIPT_PLACEHOLDERS = [
+  '[audio grabado',
+  '[sesión grabada',
+  '[sesión guardada',
+  'no se obtuvo transcripción',
+  'sin transcripción',
+];
+function isTranscriptEmpty(txt) {
+  if (!txt || !txt.trim()) return true;
+  const lower = txt.trim().toLowerCase();
+  return TRANSCRIPT_PLACEHOLDERS.some(p => lower.startsWith(p));
+}
+function getEffectiveTranscript() {
+  const sess = DB.sess(S.sessId);
+  const candidates = [
+    sess?.transcriptEdited,
+    sess?.transcriptRaw,
+    sess?.transcript,
+    S.currentTranscriptEdited,
+    S.currentTranscriptRaw,
+    getTranscriptText(),
+  ];
+  for (const t of candidates) {
+    if (t && t.trim() && !isTranscriptEmpty(t)) return t.trim();
+  }
+  return '';
+}
 async function runTool(action){
   if(!gk()){om('key');return;}
-  if(!getTranscriptText().trim()){alert('Esta sesión no tiene transcripción');return;}
+  const effectiveTxt = getEffectiveTranscript();
+  if(!effectiveTxt){
+    const box=document.getElementById('resultBox');
+    box.className='result-box on';
+    const actEl=document.getElementById('resultActions');
+    if(actEl)actEl.style.display='none';
+    box.innerHTML=`
+      <div style="background:rgba(234,179,8,.08);border:1px solid rgba(234,179,8,.35);border-radius:14px;padding:16px;line-height:1.8">
+        <div style="font-size:15px;font-weight:800;color:var(--yellow);margin-bottom:8px">⚠️ Transcripción vacía</div>
+        <div style="font-size:13px;color:var(--text);margin-bottom:12px">
+          La grabación se guardó pero la transcripción automática falló — el modelo de audio probablemente estaba saturado en ese momento.
+        </div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:14px">
+          <strong>Opciones para recuperar esta sesión:</strong><br>
+          1. Toca <strong>📄 Texto</strong> abajo y escribe o pega la transcripción manualmente<br>
+          2. Si recuerdas el contenido, dictalo en el tab de Texto<br>
+          3. Agrega el contenido como fuente en el cuaderno (📎 Fuentes)
+        </div>
+        <button class="btn btn-p" onclick="stab('transcript')" style="width:100%;font-size:13px">
+          ✏️ Ir a editar transcripción
+        </button>
+      </div>`;
+    box.scrollIntoView({behavior:'smooth',block:'nearest'});
+    return;
+  }
+  // Inyectar texto efectivo en el estado para que fullCtx() lo encuentre
+  if(!S.currentTranscriptRaw) S.currentTranscriptRaw = effectiveTxt;
+  if(!S.transcript) S.transcript = effectiveTxt;
   if(S.lastTool)document.getElementById('tb-'+S.lastTool)?.classList.remove('on');
   document.getElementById('tb-'+action)?.classList.add('on');S.lastTool=action;
   const box=document.getElementById('resultBox');box.className='result-box on';
