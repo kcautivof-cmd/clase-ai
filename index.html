@@ -1,13 +1,10 @@
-<!DOCTYPE html>
-
-<html lang="es">
-<head>
-<meta charset="utf-8"/>
-<meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
-<meta content="yes" name="apple-mobile-web-app-capable"/>
-<meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"/>
-<meta content="Clase AI" name="apple-mobile-web-app-title"/>
-<meta content="#0a0b14" name="theme-color"/>
+<html lang="es"><head>
+<meta charset="utf-8">
+<meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport">
+<meta content="yes" name="apple-mobile-web-app-capable">
+<meta content="black-translucent" name="apple-mobile-web-app-status-bar-style">
+<meta content="Clase AI" name="apple-mobile-web-app-title">
+<meta content="#0a0b14" name="theme-color">
 <title>Clase AI</title>
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
@@ -381,12 +378,10 @@ select.mi option{background:var(--s2);}
 <div class="app">
 <!-- ═══ TOPBAR ═══ -->
 <div class="topbar">
-<div class="topbar-bc" id="bc">
-<span class="bc cur">🎓 Clase AI</span>
-</div>
+<div class="topbar-bc" id="bc"><span class="bc cur">🎓 Clase AI</span></div>
 <div class="topbar-right">
 <div class="status-pill" id="spill"><span class="dot"></span><span id="spillTxt">Listo</span></div>
-<div class="t-btn" id="keyBtn" onclick="om('key')">🔑</div>
+<div class="t-btn" id="keyBtn" onclick="om('key')">✅</div>
 </div>
 </div>
 <!-- ═══ CONTENT ═══ -->
@@ -395,7 +390,7 @@ select.mi option{background:var(--s2);}
 <div class="view on" id="v-lib">
 <div class="lib-toprow">
 <div class="lib-search-wrap">
-<input class="lib-search" id="libSearch" oninput="filterLib(this.value)" placeholder="Buscar cuadernos..."/>
+<input class="lib-search" id="libSearch" oninput="filterLib(this.value)" placeholder="Buscar cuadernos...">
 </div>
 <div class="t-btn" onclick="restoreBackup()" title="Importar backup">📥</div>
 <div class="t-btn" onclick="om('sync')" title="Sync nube">☁️</div>
@@ -406,7 +401,26 @@ select.mi option{background:var(--s2);}
 <div class="sec-label">🕐 Recientes</div>
 <div class="nb-grid" id="recGrid"></div>
 </div>
-<div id="foldersEl"></div>
+<div id="foldersEl"><div class="folder-sec">
+      <div class="folder-sec-head">
+        <div class="folder-title" style="display:flex;align-items:center;gap:8px">
+          <div class="folder-dot" style="background:#7c6fff"></div>
+          <span>📁 2026 – Semestre 1</span>
+          <span class="folder-info">1 cuad · 0 ses</span>
+        </div>
+        <div class="folder-btns">
+          <div class="f-btn" onclick="openNbModal('mnwpqjsypp3')">+ Cuaderno</div>
+          <div class="f-btn" onclick="editFolder('mnwpqjsypp3')">✏️</div>
+        </div>
+      </div>
+      <div class="nb-grid" id="ng-mnwpqjsypp3"><div class="nb-card" style="background: linear-gradient(135deg, rgba(167, 139, 250, 0.933), rgba(167, 139, 250, 0.467) 55%, rgb(24, 27, 40) 100%);">
+    <div class="nb-card-bg"><div class="nb-card-watermark">📓</div></div>
+    <div class="nb-card-overlay"></div>
+    <div class="nb-card-dot" onclick="event.stopPropagation();openNbEdit('mnwpqjszok8')">⋯</div>
+    <div class="nb-card-body">
+      <div class="nb-card-name">Mi primera materia</div>
+      <div class="nb-card-meta">Sin sesiones</div>
+    </div></div><div class="nb-add-card"><div class="nb-add-card-icon">➕</div><div>Nuevo cuaderno</div></div></div></div></div>
 <div class="new-folder-row" onclick="om('folder')">📁 Nueva carpeta · semestre / año</div>
 </div>
 <!-- ██ NOTEBOOK ██ -->
@@ -503,7 +517,7 @@ select.mi option{background:var(--s2);}
 <div style="font-size:11px;color:var(--muted);margin-bottom:8px">Tutor IA · pregunta sobre la clase y las fuentes</div>
 <div class="chat-wrap" id="chatWrap"><div class="msg ai">¡Hola! Soy tu tutor. ¿Qué quieres repasar?</div></div>
 <div class="chat-in">
-<input id="chatIn" onkeydown="if(event.key==='Enter')sendChat()" placeholder="Escribe tu pregunta..." type="text"/>
+<input id="chatIn" onkeydown="if(event.key==='Enter')sendChat()" placeholder="Escribe tu pregunta..." type="text">
 <button class="chat-send" onclick="sendChat()">➤</button>
 </div>
 </div>
@@ -541,8 +555,8 @@ select.mi option{background:var(--s2);}
 <div class="overlay" id="m-key" onclick="if(event.target===this)cm('key')">
 <div class="modal">
 <div class="modal-title">🔑 API Key de Gemini</div>
-<input class="mi" id="apiIn" placeholder="Pega tu API key aquí" type="password"/>
-<div class="hint">Obtén tu key gratis en <a href="https://aistudio.google.com/apikey" target="_blank">aistudio.google.com/apikey</a><br/>Se guarda solo en tu dispositivo.</div>
+<input class="mi" id="apiIn" placeholder="Pega tu API key aquí" type="password">
+<div class="hint">Obtén tu key gratis en <a href="https://aistudio.google.com/apikey" target="_blank">aistudio.google.com/apikey</a><br>Se guarda solo en tu dispositivo.</div>
 <div class="row"><button class="btn btn-g" onclick="cm('key')" style="flex:1">Cancelar</button><button class="btn btn-p" onclick="saveKey()" style="flex:2">Guardar</button></div>
 </div>
 </div>
@@ -551,13 +565,13 @@ select.mi option{background:var(--s2);}
 <div class="modal">
 <div class="modal-title">☁️ Sincronización entre dispositivos</div>
 <div class="ml">Código de sincronización</div>
-<input class="mi" id="syncCode" placeholder="Ej: kevin-clases-2026" type="text"/>
+<input class="mi" id="syncCode" placeholder="Ej: kevin-clases-2026" type="text">
 <div class="hint">
-      Usa el mismo código en tu iPhone y PC para compartir todos tus cuadernos automáticamente.<br/>
+      Usa el mismo código en tu iPhone y PC para compartir todos tus cuadernos automáticamente.<br>
       Requiere una config de Firebase gratuita. <a href="https://console.firebase.google.com" target="_blank">Crear proyecto Firebase →</a>
 </div>
 <div class="ml">Firebase Config (pega el objeto JSON)</div>
-<textarea class="mi" id="fbConfig" placeholder='{"apiKey":"...","authDomain":"...","projectId":"..."}'></textarea>
+<textarea class="mi" id="fbConfig" placeholder="{&quot;apiKey&quot;:&quot;...&quot;,&quot;authDomain&quot;:&quot;...&quot;,&quot;projectId&quot;:&quot;...&quot;}"></textarea>
 <div class="row" style="margin-top:10px">
 <button class="btn btn-g" onclick="cm('sync')" style="flex:1">Cancelar</button>
 <button class="btn btn-g" onclick="restoreBackup()" style="flex:1">📥 Backup</button>
@@ -573,10 +587,10 @@ select.mi option{background:var(--s2);}
 <div class="modal">
 <div class="modal-title" id="folderMT">📁 Nueva carpeta</div>
 <div class="ml">Nombre</div>
-<input class="mi" id="folderName" placeholder="ej: 2026 - Semestre 1" type="text"/>
+<input class="mi" id="folderName" placeholder="ej: 2026 - Semestre 1" type="text">
 <div class="ml">Color</div>
 <div class="color-row" id="folderColors"></div>
-<input id="folderEId" type="hidden"/>
+<input id="folderEId" type="hidden">
 <div class="row" style="margin-top:14px">
 <button class="btn btn-g" onclick="cm('folder')" style="flex:1">Cancelar</button>
 <button class="btn btn-r" id="folderDelBtn" onclick="delFolder()" style="display:none">🗑</button>
@@ -589,13 +603,13 @@ select.mi option{background:var(--s2);}
 <div class="modal">
 <div class="modal-title" id="nbMT">📓 Nuevo cuaderno</div>
 <div class="ml">Nombre</div>
-<input class="mi" id="nbNameIn" placeholder="ej: Psicología" type="text"/>
+<input class="mi" id="nbNameIn" placeholder="ej: Psicología" type="text">
 <div class="ml">Ícono</div>
 <div class="icon-grid" id="nbIcons"></div>
 <div class="ml">Color</div>
 <div class="color-row" id="nbColors"></div>
-<input id="nbEId" type="hidden"/>
-<input id="nbFId" type="hidden"/>
+<input id="nbEId" type="hidden">
+<input id="nbFId" type="hidden">
 <div class="row" style="margin-top:14px">
 <button class="btn btn-g" onclick="cm('nb')" style="flex:1">Cancelar</button>
 <button class="btn btn-r" id="nbDelBtn" onclick="delNb()" style="display:none">🗑</button>
@@ -608,7 +622,7 @@ select.mi option{background:var(--s2);}
 <div class="modal">
 <div class="modal-title">✏️ Editar cuaderno</div>
 <div class="ml">Nombre</div>
-<input class="mi" id="eNbName" placeholder="Nombre" type="text"/>
+<input class="mi" id="eNbName" placeholder="Nombre" type="text">
 <div class="ml">Ícono</div>
 <div class="icon-grid" id="eNbIcons"></div>
 <div class="ml">Color</div>
@@ -643,7 +657,7 @@ select.mi option{background:var(--s2);}
 <div class="modal">
 <div class="modal-title">💾 Guardar sesión</div>
 <div class="ml">Título de la clase</div>
-<input class="mi" id="sessTitle" placeholder="ej: Clase 1 – Introducción" type="text"/>
+<input class="mi" id="sessTitle" placeholder="ej: Clase 1 – Introducción" type="text">
 <div class="row" style="margin-top:12px">
 <button class="btn btn-g" onclick="saveSess(false)" style="flex:1">Sin título</button>
 <button class="btn btn-p" onclick="saveSess(true)" style="flex:2">Guardar</button>
@@ -655,7 +669,7 @@ select.mi option{background:var(--s2);}
 <div class="modal">
 <div class="modal-title">⚙️ Opciones de sesión</div>
 <div class="ml">Renombrar</div>
-<input class="mi" id="sessRename" placeholder="Nuevo nombre" type="text"/>
+<input class="mi" id="sessRename" placeholder="Nuevo nombre" type="text">
 <div class="row" style="margin-top:12px">
 <button class="btn btn-r" onclick="delCurSess()" style="flex:1">🗑 Eliminar</button>
 <button class="btn btn-p" onclick="renameSess()" style="flex:2">Renombrar</button>
@@ -667,10 +681,15 @@ select.mi option{background:var(--s2);}
 //  CONFIG & CONSTANTS
 // ═══════════════════════════════════════════════════════════════
 const BUILTIN_API_KEY = 'AIzaSyBM6bvhbx-hwoJwUiK9wiXNFx_2mv4dl-U';
-const REST_MODEL = 'gemini-2.5-flash';
-const REST_URL = k=>`https://generativelanguage.googleapis.com/v1beta/models/${REST_MODEL}:generateContent?key=${k}`;
-const TRANSCRIBE_CHUNK_SECONDS = 12;
+const TEXT_MODEL = 'gemini-2.5-flash';
+const AUDIO_MODEL = 'gemini-3.1-flash-lite-preview';
+const LIVE_MODEL = 'gemini-3.1-flash-live-preview';
+const TEXT_REST_URL = k=>`https://generativelanguage.googleapis.com/v1beta/models/${TEXT_MODEL}:generateContent?key=${k}`;
+const AUDIO_REST_URL = k=>`https://generativelanguage.googleapis.com/v1beta/models/${AUDIO_MODEL}:generateContent?key=${k}`;
+const LIVE_WS_URL = k=>`wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContent?key=${k}`;
+const TRANSCRIBE_CHUNK_SECONDS = 20;
 const TRANSCRIBE_MIN_FINAL_SECONDS = 2;
+const TRANSCRIBE_AFTER_STOP_CHUNK_SECONDS = 24;
 const COLORS  = ['#7c6fff','#a78bfa','#22c55e','#06b6d4','#f97316','#ef4444','#eab308','#ec4899','#14b8a6','#3b82f6'];
 const ICONS   = ['📓','🧠','🔬','⚗️','📐','🌎','💊','⚖️','💻','📖','🎭','🎵','🏛️','🧬','📊','🌱','🔭','✍️','🎓','🏥','🧪','📡'];
 
@@ -679,16 +698,19 @@ const ICONS   = ['📓','🧠','🔬','⚗️','📐','🌎','💊','⚖️','�
 // ═══════════════════════════════════════════════════════════════
 const S = {
   view:'lib', nbId:null, sessId:null,
-  transcript:'', lastResult:'', lastTool:null,
+  transcript:'', liveTurnText:'', lastResult:'', lastTool:null,
   isRec:false, isPaused:false, stopped:false,
   secs:0,
   stream:null, actx:null, proc:null, src_node:null,
   wl:null, ti:null,
   captureRate:16000, chunkFloatParts:[], chunkFloatSamples:0,
   transcribeQueue:[], transcribing:false, pendingStop:false, chunkCounter:0,
+  liveWs:null, liveWsReady:false, liveFallback:false, wsAudioBacklog:[], liveReadyTimer:null,
   qAns:[], qOk:0,
   selFColor:COLORS[0], selNbIcon:ICONS[0], selNbColor:COLORS[0],
-  eNbIcon:ICONS[0], eNbColor:COLORS[0], srcType:'file'
+  eNbIcon:ICONS[0], eNbColor:COLORS[0], srcType:'file',
+  liveSpeech:null, liveSpeechSupported:false, liveSpeechFinal:'', liveSpeechInterim:'',
+  taskQueue:Promise.resolve(), lastApiCallAt:0
 };
 
 // ═══════════════════════════════════════════════════════════════
@@ -1045,15 +1067,123 @@ function stab(t){
 // ═══════════════════════════════════════════════════════════════
 function setPill(txt,cls=''){document.getElementById('spillTxt').textContent=txt;document.getElementById('spill').className='status-pill'+(cls?' '+cls:'');}
 function setLabel(txt){document.getElementById('recLabel').textContent=txt;}
+function isIOSLike(){return /iPad|iPhone|iPod/.test(navigator.userAgent)||(/Mac/.test(navigator.userAgent)&&navigator.maxTouchPoints>1);}
+function shouldUseDeferredGeminiTranscription(){return isIOSLike();}
+function sentenceSplit(t=''){return (t||'').replace(/\s+/g,' ').split(/(?<=[\.!?])\s+/).map(s=>s.trim()).filter(Boolean);}
+function getCombinedTranscript(){
+  const parts=[];
+  const live=(S.liveSpeechFinal||'').trim();
+  const saved=(S.transcript||'').trim();
+  if(live)parts.push(live);
+  if(saved&&saved!==live)parts.push(saved);
+  return parts.join('\n\n').trim();
+}
+function localFallbackForAction(action,content,q=''){
+  const ss=sentenceSplit(content);
+  const bullets=ss.slice(0,6).map(s=>`- ${s}`);
+  if(action==='summary')return `## Resumen rápido\n\n${bullets.join('\n')||'- Sin contenido suficiente.'}`;
+  if(action==='outline')return ['## Esquema',...ss.slice(0,6).map((s,i)=>`- Tema ${i+1}: ${s}`)].join('\n');
+  if(action==='questions')return ss.slice(0,8).map((s,i)=>`${i+1}. ¿Qué idea aparece en la clase?\n   - Respuesta: ${s}`).join('\n\n')||'1. ¿Cuál es el tema principal?\n   - Respuesta: Sin contenido suficiente.';
+  if(action==='mindmap')return ['Tema central',...ss.slice(0,6).map((s,i)=>`→ Rama ${i+1}: ${s}`)].join('\n');
+  if(action==='presentation')return Array.from({length:6},(_,i)=>`## Slide ${i+1}\n- ${ss[i*2]||'Sin dato'}\n- ${ss[i*2+1]||'Sin dato'}`).join('\n\n---\n\n');
+  if(action==='report')return `## Introducción\n\n${ss.slice(0,2).join(' ')}\n\n## Desarrollo\n\n${bullets.join('\n')}\n\n## Conclusión\n\n${ss.slice(-2).join(' ')}`;
+  if(action==='infographic')return ['# Infografía rápida',...ss.slice(0,5).map((s,i)=>`- Bloque ${i+1}: ${s}`)].join('\n');
+  if(action==='datatable'){let out='| Ítem | Contenido |\n|---|---|\n'; ss.slice(0,6).forEach((s,i)=>out+=`| ${i+1} | ${s.replace(/\|/g,'/')} |\n`); return out;}
+  if(action==='cards')return JSON.stringify(ss.slice(0,12).map((s,i)=>({q:`Tarjeta ${i+1}: ¿Qué idea aparece?`,a:s||'Sin dato'})));
+  if(action==='quiz')return JSON.stringify(ss.slice(0,8).map((s,i)=>({question:`Según la clase, ¿qué afirmación es correcta en el punto ${i+1}?`,options:[s,'No se trató el tema','La clase fue sobre otra cosa','No hubo contenido'],correct:0,explanation:s})));
+  if(action==='chat')return `Respuesta local provisional:\n\n${ss.slice(0,6).join(' ')||'No hay suficiente contenido.'}\n\nPregunta: ${q}`;
+  return 'Sin contenido suficiente.';
+}
+async function scheduleApiWork(fn){
+  const runner=async()=>{
+    const wait=Math.max(0,1200-(Date.now()-S.lastApiCallAt));
+    if(wait)await sleep(wait);
+    try{return await fn();}finally{S.lastApiCallAt=Date.now();}
+  };
+  S.taskQueue=S.taskQueue.then(runner,runner);
+  return S.taskQueue;
+}
+function startBrowserSpeechRecognition(){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  S.liveSpeechSupported=!!SR;
+  if(!SR)return false;
+  try{
+    if(S.liveSpeech){try{S.liveSpeech.stop();}catch(e){}}
+    const rec=new SR();
+    rec.lang='es-ES';
+    rec.continuous=true;
+    rec.interimResults=true;
+    rec.maxAlternatives=1;
+    rec.onresult=(event)=>{
+      let finalChunk='';
+      let interim='';
+      for(let i=event.resultIndex;i<event.results.length;i++){
+        const txt=(event.results[i][0]&&event.results[i][0].transcript||'').trim();
+        if(!txt)continue;
+        if(event.results[i].isFinal)finalChunk+=(finalChunk?' ':'')+txt;
+        else interim+=(interim?' ':'')+txt;
+      }
+      if(finalChunk){S.liveSpeechFinal=(S.liveSpeechFinal?S.liveSpeechFinal+' ':'')+finalChunk;S.lastSpeechSeenAt=Date.now();}
+      if(interim)S.lastSpeechSeenAt=Date.now();
+      S.liveSpeechInterim=interim;
+      renderTranscript();
+    };
+    rec.onend=()=>{ if(S.isRec&&!S.pendingStop&&!S.isPaused){ try{rec.start();}catch(e){} } };
+    rec.onerror=(e)=>console.warn('speech-recognition',e);
+    rec.start();
+    S.liveSpeech=rec;
+    return true;
+  }catch(e){console.warn('speech start failed',e);return false;}
+}
+function stopBrowserSpeechRecognition(){
+  if(S.liveSpeech){ try{S.liveSpeech.onend=null;S.liveSpeech.stop();}catch(e){} }
+  S.liveSpeech=null;
+  S.liveSpeechInterim='';
+  renderTranscript();
+}
 function escHtml(s=''){return s.replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
+function getTranscriptText(){
+  const finalText=(S.transcript||'').trim();
+  const liveText=(S.liveTurnText||'').trim();
+  if(finalText&&liveText)return finalText+'\n\n'+liveText;
+  return finalText||liveText||'';
+}
 function renderTranscript(){
   const box=document.getElementById('liveBox');
-  if(!S.transcript.trim()){box.innerHTML='<span class="ph">La transcripción aparece aquí...</span>';return;}
-  box.innerHTML='<p>'+escHtml(S.transcript).replace(/\n{2,}/g,'</p><p>').replace(/\n/g,'<br/>')+'</p>';
+  const finalText=(S.transcript||'').trim();
+  const liveText=(S.liveTurnText||'').trim();
+  if(!finalText&&!liveText){box.innerHTML='<span class="ph">La transcripción aparece aquí...</span>';return;}
+  let html='';
+  if(finalText)html+='<p>'+escHtml(finalText).replace(/\n{2,}/g,'</p><p>').replace(/\n/g,'<br/>')+'</p>';
+  if(liveText)html+='<p style="opacity:.82">'+escHtml(liveText).replace(/\n/g,'<br/>')+'</p>';
+  box.innerHTML=html;
   box.scrollTop=999999;
 }
+function clearLiveTimer(){if(S.liveReadyTimer){clearTimeout(S.liveReadyTimer);S.liveReadyTimer=null;}}
+function closeLiveWs(){
+  clearLiveTimer();
+  if(S.liveWs){
+    try{S.liveWs.onopen=null;S.liveWs.onmessage=null;S.liveWs.onerror=null;S.liveWs.onclose=null;S.liveWs.close();}catch(e){}
+  }
+  S.liveWs=null;
+  S.liveWsReady=false;
+  S.wsAudioBacklog=[];
+}
+async function requestWakeLockAgain(){
+  if(!('wakeLock' in navigator)||!S.isRec||document.hidden)return;
+  try{
+    if(S.wl){try{await S.wl.release();}catch(e){}}
+    S.wl=await navigator.wakeLock.request('screen');
+  }catch(e){}
+}
+document.addEventListener('visibilitychange',()=>{
+  if(!S.isRec)return;
+  if(document.visibilityState==='visible')requestWakeLockAgain();
+  else setLabel('Si bloqueas el iPhone, iOS puede cortar el micrófono. Mejor déjala abierta.');
+});
 function resetRecState(){
   S.transcript='';
+  S.liveTurnText='';
   S.secs=0;
   S.stopped=false;
   S.isRec=false;
@@ -1065,7 +1195,21 @@ function resetRecState(){
   S.transcribing=false;
   S.pendingStop=false;
   S.chunkCounter=0;
+  S.liveFallback=false;
+  S.deferGeminiTranscription=shouldUseDeferredGeminiTranscription();
+  S.lastSpeechSeenAt=0;
+  S.liveSpeechFinal='';
+  S.liveSpeechInterim='';
+  closeLiveWs();
   updTimer();
+  renderTranscript();
+}
+function commitLiveTurn(){
+  const clean=(S.liveTurnText||'').trim();
+  if(!clean)return;
+  if(!S.transcript.trim())S.transcript=clean;
+  else if(!S.transcript.trim().endsWith(clean))S.transcript+='\n\n'+clean;
+  S.liveTurnText='';
   renderTranscript();
 }
 function mergeFloatBuffers(parts,total){
@@ -1095,6 +1239,13 @@ function downsampleTo16k(input,sampleRate){
     offsetBuffer=nextOffset;
   }
   return out;
+}
+function pcm16ToBase64(samples){
+  if(!samples?.length)return '';
+  const bytes=new Uint8Array(samples.buffer);
+  let binary='';
+  for(let i=0;i<bytes.length;i+=0x8000)binary+=String.fromCharCode(...bytes.subarray(i,i+0x8000));
+  return btoa(binary);
 }
 function pcm16ToWavBase64(samples,sampleRate=16000){
   const bytesPerSample=2;
@@ -1128,30 +1279,64 @@ function extractTextFromResponse(d){
     .join('')
     .trim();
 }
+function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
+function extractRetryMs(message=''){
+  const m=String(message||'').match(/retry in\s*([0-9.]+)s/i);
+  if(!m)return 0;
+  return Math.max(0,Math.ceil(parseFloat(m[1])*1000)+700);
+}
+function isQuotaErrorMessage(message=''){
+  const t=String(message||'').toLowerCase();
+  return t.includes('quota exceeded')||t.includes('rate limit')||t.includes('resource exhausted')||t.includes('too many requests');
+}
+async function geminiJsonFetch(url,body,{retries=2,onRetry}={}){
+  let attempt=0;
+  let lastErr=null;
+  while(attempt<=retries){
+    const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    const d=await r.json().catch(()=>({}));
+    if(!d.error)return d;
+    const msg=d.error?.message||'Error de Gemini';
+    const retryMs=extractRetryMs(msg);
+    const quota=isQuotaErrorMessage(msg);
+    lastErr=new Error(msg);
+    if((quota||retryMs>0)&&attempt<retries){
+      const waitMs=retryMs||2000*(attempt+1);
+      if(typeof onRetry==='function')onRetry(waitMs,msg,attempt+1);
+      await sleep(waitMs);
+      attempt++;
+      continue;
+    }
+    throw lastErr;
+  }
+  throw lastErr||new Error('Error de Gemini');
+}
 async function transcribeChunk(base64Wav){
   const prompt='Transcribe literalmente este fragmento de audio. Devuelve solo la transcripción en español, sin resumen, sin traducción, sin comentarios y sin encabezados.';
-  const r=await fetch(REST_URL(gk()),{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({
-      generationConfig:{temperature:0},
-      contents:[{parts:[
-        {text:prompt},
-        {inlineData:{mimeType:'audio/wav',data:base64Wav}}
-      ]}]
-    })
+  const d=await geminiJsonFetch(AUDIO_REST_URL(gk()),{
+    generationConfig:{temperature:0},
+    contents:[{parts:[
+      {text:prompt},
+      {inlineData:{mimeType:'audio/wav',data:base64Wav}}
+    ]}]
+  },{
+    retries:4,
+    onRetry:(waitMs)=>{
+      setPill('Reintentando','warn');
+      setLabel(`Esperando cupo para transcribir... ${Math.ceil(waitMs/1000)}s`);
+    }
   });
-  const d=await r.json();
-  if(d.error)throw new Error(d.error.message||'No se pudo transcribir');
   return extractTextFromResponse(d);
 }
 function appendTranscript(t){
   const clean=(t||'').trim();
   if(!clean)return;
-  S.transcript+=(S.transcript?'\n\n':'')+clean;
+  if(!S.transcript.trim())S.transcript=clean;
+  else if(!S.transcript.trim().endsWith(clean))S.transcript+='\n\n'+clean;
   renderTranscript();
 }
 function cleanupCapture(){
+  closeLiveWs();
   ['proc','src_node'].forEach(k=>{if(S[k]){try{S[k].disconnect();}catch(e){}S[k]=null;}});
   if(S.actx&&S.actx.state!=='closed'){try{S.actx.close();}catch(e){}S.actx=null;}
   if(S.stream){S.stream.getTracks().forEach(t=>t.stop());S.stream=null;}
@@ -1169,17 +1354,28 @@ async function processTranscribeQueue(){
     appendTranscript(txt);
     if(S.pendingStop)setLabel('Finalizando transcripción...');
     else if(S.isPaused)setLabel('Pausado — bloque procesado');
-    else if(S.isRec)setLabel('Grabando...');
+    else if(S.isRec)setLabel(S.deferGeminiTranscription?'Grabando localmente...':'Grabando (modo alterno)...');
   }catch(e){
     console.error('Transcription error',e);
     setPill('Error','warn');
     setLabel('Error al transcribir un bloque, la grabación sigue');
   }finally{
     S.transcribing=false;
-    if(S.isRec&&!S.pendingStop)setPill('Grabando','rec');
+    if(S.isRec&&!S.pendingStop)setPill(S.liveFallback?'Modo alterno':'Grabando',S.liveFallback?'warn':'rec');
     if(S.transcribeQueue.length)processTranscribeQueue();
     else maybeFinishAfterDrain();
   }
+}
+function enqueuePcmForTranscription(pcm16,maxSeconds=TRANSCRIBE_AFTER_STOP_CHUNK_SECONDS){
+  if(!pcm16?.length)return;
+  const perChunk=Math.max(16000,Math.floor(16000*maxSeconds));
+  for(let offset=0;offset<pcm16.length;offset+=perChunk){
+    const slice=pcm16.slice(offset,offset+perChunk);
+    if(slice.length<800)continue;
+    const b64=pcm16ToWavBase64(slice,16000);
+    S.transcribeQueue.push({id:++S.chunkCounter,b64});
+  }
+  processTranscribeQueue();
 }
 function flushChunk(force=false){
   if(!S.chunkFloatSamples)return;
@@ -1190,9 +1386,50 @@ function flushChunk(force=false){
   S.chunkFloatSamples=0;
   const pcm16=downsampleTo16k(merged,S.captureRate);
   if(pcm16.length<800)return;
-  const b64=pcm16ToWavBase64(pcm16,16000);
-  S.transcribeQueue.push({id:++S.chunkCounter,b64});
-  processTranscribeQueue();
+  if(!force&&S.deferGeminiTranscription)return;
+  enqueuePcmForTranscription(pcm16, force?TRANSCRIBE_AFTER_STOP_CHUNK_SECONDS:TRANSCRIBE_CHUNK_SECONDS);
+}
+function sendLiveAudioBase64(base64Pcm){
+  if(!base64Pcm||S.liveFallback||S.pendingStop)return;
+  if(S.liveWs&&S.liveWsReady&&S.liveWs.readyState===1){
+    try{
+      S.liveWs.send(JSON.stringify({realtimeInput:{audio:{data:base64Pcm,mimeType:'audio/pcm;rate=16000'}}}));
+    }catch(e){
+      console.error('live send error',e);
+      enableFallback('Falló la transmisión en vivo');
+    }
+  }else{
+    if(S.wsAudioBacklog.length>=24)S.wsAudioBacklog.shift();
+    S.wsAudioBacklog.push(base64Pcm);
+  }
+}
+function flushLiveBacklog(){
+  if(!S.liveWs||!S.liveWsReady||S.liveWs.readyState!==1||!S.wsAudioBacklog.length)return;
+  const backlog=S.wsAudioBacklog.slice();
+  S.wsAudioBacklog=[];
+  backlog.forEach(b64=>sendLiveAudioBase64(b64));
+}
+function enableFallback(reason=''){
+  if(S.liveFallback||S.pendingStop)return;
+  S.liveFallback=true;
+  closeLiveWs();
+  commitLiveTurn();
+  S.chunkFloatParts=[];
+  S.chunkFloatSamples=0;
+  setPill('Modo alterno','warn');
+  setLabel(reason?reason+' · transcripción por bloques':'Transcripción por bloques');
+}
+function connectLiveTranscription(){
+  closeLiveWs();
+  const speechOk=startBrowserSpeechRecognition();
+  S.liveFallback=true;
+  if(S.deferGeminiTranscription){
+    setPill(speechOk?'Grabando':'Grabando local',speechOk?'rec':'warn');
+    setLabel(speechOk?'Grabando + subtítulos del navegador · transcripción final al detener':'Grabando localmente · transcripción final al detener');
+  }else{
+    setPill(speechOk?'Grabando':'Modo alterno',speechOk?'rec':'warn');
+    setLabel(speechOk?'Grabando y transcribiendo en vivo...':'Grabando y transcribiendo por bloques...');
+  }
 }
 async function startRec(){
   if(!gk()){om('key');return;}
@@ -1205,18 +1442,19 @@ async function startRec(){
   document.getElementById('recBtn').classList.add('active');
   document.getElementById('pauseBtn').disabled=false;
   document.getElementById('stopBtn').disabled=false;
-  document.getElementById('sessPill').textContent='sin límite práctico';
-  setPill('Grabando','rec');
-  setLabel('Grabando...');
+  document.getElementById('sessPill').textContent=shouldUseDeferredGeminiTranscription()?'modo iPhone estable · transcripción completa al detener':'mantén la pantalla activa · transcripción en vivo si Safari lo permite';
+  setPill('Conectando','warn');
+  setLabel('Iniciando grabación...');
   document.getElementById('waveEl').style.display='flex';
   renderTranscript();
   S.ti=setInterval(()=>{S.secs++;updTimer();},1000);
-  try{if('wakeLock' in navigator)S.wl=await navigator.wakeLock.request('screen');}catch(e){}
+  await requestWakeLockAgain();
   S.actx=new(window.AudioContext||window.webkitAudioContext)();
   if(S.actx.state==='suspended')await S.actx.resume();
   S.captureRate=S.actx.sampleRate||48000;
   S.src_node=S.actx.createMediaStreamSource(S.stream);
   S.proc=S.actx.createScriptProcessor(4096,1,1);
+  connectLiveTranscription();
   S.proc.onaudioprocess=ev=>{
     if(!S.isRec||S.isPaused||S.pendingStop)return;
     const input=ev.inputBuffer.getChannelData(0);
@@ -1234,10 +1472,12 @@ function pauseRec(){
   S.isPaused=!S.isPaused;
   document.getElementById('pauseBtn').textContent=S.isPaused?'▶':'⏸';
   document.getElementById('waveEl').style.display=S.isPaused?'none':'flex';
-  setPill(S.isPaused?'Pausado':'Grabando',S.isPaused?'warn':'rec');
-  setLabel(S.isPaused?'Pausado — toca ▶ para continuar':'Grabando...');
-  if(S.isPaused){clearInterval(S.ti);}else{S.ti=setInterval(()=>{S.secs++;updTimer();},1000);}
+  setPill(S.isPaused?'Pausado':(S.liveFallback?'Modo alterno':'Grabando'),S.isPaused?'warn':(S.liveFallback?'warn':'rec'));
+  setLabel(S.isPaused?'Pausado — toca ▶ para continuar':(S.deferGeminiTranscription?'Grabando localmente...':'Grabando y transcribiendo por bloques...'));
+  if(S.isPaused){clearInterval(S.ti);stopBrowserSpeechRecognition();}
+  else{S.ti=setInterval(()=>{S.secs++;updTimer();},1000);if(S.liveSpeechSupported)startBrowserSpeechRecognition();}
 }
+
 function stopRec(){
   if(S.pendingStop)return;
   S.stopped=true;
@@ -1247,8 +1487,11 @@ function stopRec(){
   document.getElementById('pauseBtn').disabled=true;
   document.getElementById('stopBtn').disabled=true;
   document.getElementById('waveEl').style.display='none';
+  stopBrowserSpeechRecognition();
+  commitLiveTurn();
+  S.transcript=getCombinedTranscript();
   setPill('Procesando','warn');
-  setLabel('Finalizando transcripción...');
+  setLabel(S.deferGeminiTranscription?'Transcribiendo audio final...':'Finalizando transcripción...');
   flushChunk(true);
   cleanupCapture();
   maybeFinishAfterDrain();
@@ -1264,9 +1507,10 @@ function finishRec(){
   document.getElementById('pauseBtn').textContent='⏸';
   document.getElementById('stopBtn').disabled=true;
   document.getElementById('waveEl').style.display='none';
+  S.transcript=getCombinedTranscript();
   setPill('Listo','ok');
   setLabel('Grabación terminada ✓');
-  if(S.transcript.trim())document.getElementById('m-save').classList.add('on');
+  if(getTranscriptText().trim())document.getElementById('m-save').classList.add('on');
 }
 function updTimer(){
   const h=Math.floor(S.secs/3600),m=Math.floor((S.secs%3600)/60),s=S.secs%60;
@@ -1275,8 +1519,9 @@ function updTimer(){
 function saveSess(useTitle){
   const title=useTitle?document.getElementById('sessTitle').value.trim()||'Clase sin título':'Clase '+new Date().toLocaleDateString('es',{day:'numeric',month:'short'});
   document.getElementById('m-save').classList.remove('on');
-  if(!S.transcript.trim())return;
-  const sess=DB.mkSess(S.nbId,title,S.transcript);
+  const transcriptText=getTranscriptText();
+  if(!transcriptText.trim())return;
+  const sess=DB.mkSess(S.nbId,title,transcriptText);
   S.sessId=sess.id;goSess(sess.id);
 }
 
@@ -1286,18 +1531,14 @@ function saveSess(useTitle){
 function fullCtx(){
   const srcs=DB.sources(S.nbId);
   const extra=srcs.length?'\n\nFUENTES DEL CUADERNO:\n'+srcs.map(s=>`[${s.type.toUpperCase()}: ${s.name}]\n${(s.content||'').slice(0,3000)}`).join('\n\n'):'';
-  return (S.transcript||'')+extra;
+  return getCombinedTranscript()+extra;
 }
-async function callGemini(prompt){
-  const r=await fetch(REST_URL(gk()),{method:'POST',headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({generationConfig:{temperature:0.4},contents:[{parts:[{text:prompt}]}]})});
-  const d=await r.json();if(d.error)throw new Error(d.error.message);
+async function callGemini(prompt,{onRetry}={}){
+  const d=await geminiJsonFetch(TEXT_REST_URL(gk()),{generationConfig:{temperature:0.4},contents:[{parts:[{text:prompt}]}]},{retries:2,onRetry});
   return extractTextFromResponse(d);
 }
-async function callParts(parts){
-  const r=await fetch(REST_URL(gk()),{method:'POST',headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({contents:[{parts}]})});
-  const d=await r.json();if(d.error)throw new Error(d.error.message);
+async function callParts(parts,{onRetry}={}){
+  const d=await geminiJsonFetch(TEXT_REST_URL(gk()),{contents:[{parts}]},{retries:2,onRetry});
   return extractTextFromResponse(d);
 }
 
@@ -1320,13 +1561,20 @@ const P={
 
 async function runTool(action){
   if(!gk()){om('key');return;}
-  if(!S.transcript?.trim()){alert('Esta sesión no tiene transcripción');return;}
+  if(!getTranscriptText().trim()){alert('Esta sesión no tiene transcripción');return;}
   if(S.lastTool)document.getElementById('tb-'+S.lastTool)?.classList.remove('on');
   document.getElementById('tb-'+action)?.classList.add('on');S.lastTool=action;
   const box=document.getElementById('resultBox');box.className='result-box on';
+  const cached=DB.sess(S.sessId)?.results?.[action];
+  if(cached){
+    S.lastResult=cached;
+    box.innerHTML=marked.parse(cached);
+    box.scrollIntoView({behavior:'smooth',block:'nearest'});
+    return;
+  }
   box.innerHTML='<div class="loading"><div class="spin"></div>Generando con Gemini...</div>';
   try{
-    const r=await callGemini(P[action](fullCtx()));
+    const r=await callGemini(P[action](fullCtx()),{onRetry:(waitMs)=>{box.innerHTML=`<div class="loading"><div class="spin"></div>Esperando cupo de Gemini... ${Math.ceil(waitMs/1000)}s</div>`;}});
     S.lastResult=r;box.innerHTML=marked.parse(r);
     DB.updSess(S.sessId,{results:{...DB.sess(S.sessId)?.results,[action]:r}});
     box.scrollIntoView({behavior:'smooth',block:'nearest'});
@@ -1334,10 +1582,10 @@ async function runTool(action){
 }
 
 async function loadCards(){
-  if(!gk()||!S.transcript?.trim()){alert('Necesitas key y transcripción');return;}
+  if(!gk()||!getTranscriptText().trim()){alert('Necesitas key y transcripción');return;}
   const g=document.getElementById('fcGrid');g.innerHTML='<div class="loading"><div class="spin"></div>Generando...</div>';
   try{
-    let raw=await callGemini(P.cards(fullCtx()));
+    let raw=await callGemini(P.cards(fullCtx()),{onRetry:(waitMs)=>{g.innerHTML=`<div class="loading"><div class="spin"></div>Esperando cupo... ${Math.ceil(waitMs/1000)}s</div>`;}});
     if(raw.includes('```'))raw=raw.split('\n').filter(l=>!l.startsWith('```')).join('\n').trim();
     JSON.parse(raw).forEach(c=>{
       const el=document.createElement('div');el.className='fc';
@@ -1349,11 +1597,11 @@ async function loadCards(){
 }
 
 async function loadQuiz(){
-  if(!gk()||!S.transcript?.trim()){alert('Necesitas key y transcripción');return;}
+  if(!gk()||!getTranscriptText().trim()){alert('Necesitas key y transcripción');return;}
   const c=document.getElementById('quizContainer');document.getElementById('quizScore').style.display='none';
   c.innerHTML='<div class="loading"><div class="spin"></div>Generando...</div>';S.qAns=[];S.qOk=0;
   try{
-    let raw=await callGemini(P.quiz(fullCtx()));
+    let raw=await callGemini(P.quiz(fullCtx()),{onRetry:(waitMs)=>{c.innerHTML=`<div class="loading"><div class="spin"></div>Esperando cupo... ${Math.ceil(waitMs/1000)}s</div>`;}});
     if(raw.includes('```'))raw=raw.split('\n').filter(l=>!l.startsWith('```')).join('\n').trim();
     const qs=JSON.parse(raw);S.qAns=new Array(qs.length).fill(-1);c.innerHTML='';
     qs.forEach((q,qi)=>{
@@ -1380,7 +1628,7 @@ async function sendChat(){
   const w=document.getElementById('chatWrap');
   w.innerHTML+=`<div class="msg me">${q}</div><div class="msg ai" id="aiT"><div class="loading"><div class="spin"></div>Pensando...</div></div>`;
   w.scrollTop=9999;
-  try{const r=await callGemini(P.chat(fullCtx(),q));const el=document.getElementById('aiT');el.id='';el.innerHTML=marked.parse(r);}
+  try{const r=await callGemini(P.chat(fullCtx(),q),{onRetry:(waitMs)=>{const el=document.getElementById('aiT');if(el)el.innerHTML=`<div class="loading"><div class="spin"></div>Esperando cupo... ${Math.ceil(waitMs/1000)}s</div>`;}});const el=document.getElementById('aiT');el.id='';el.innerHTML=marked.parse(r);}
   catch(e){const el=document.getElementById('aiT');el.id='';el.innerHTML=`<span style="color:var(--red)">${e.message}</span>`;}
   w.scrollTop=9999;
 }
@@ -1417,7 +1665,7 @@ async function addSrc(){
       const url=document.getElementById('srcUrl')?.value.trim();
       if(!url)throw new Error('Ingresa una URL');
       const prompt=t==='youtube'?[{fileData:{mimeType:'video/*',fileUri:url}},{text:'Transcribe y resume este video en español para uso académico.'}]:[{text:`Extrae el contenido más importante de esta URL para estudio: ${url}`}];
-      const content=await callParts(prompt);
+      const content=await callParts(prompt,{onRetry:(waitMs)=>{btn.textContent=`Esperando ${Math.ceil(waitMs/1000)}s...`;}});
       DB.addSrc(S.nbId,{type:t,name:url.slice(0,60),content,url});
     } else {
       const file=document.getElementById('srcFile')?.files[0];
@@ -1434,11 +1682,11 @@ async function addSrc(){
         DB.addSrc(S.nbId,{type:'file',name:file.name,content:txt.slice(0,12000)});
       } else if(t==='image'){
         const b64=await f2b64(file);
-        const desc=await callParts([{inlineData:{mimeType:file.type,data:b64}},{text:'Describe detalladamente el contenido de esta imagen para estudio académico.'}]);
+        const desc=await callParts([{inlineData:{mimeType:file.type,data:b64}},{text:'Describe detalladamente el contenido de esta imagen para estudio académico.'}],{onRetry:(waitMs)=>{btn.textContent=`Esperando ${Math.ceil(waitMs/1000)}s...`;}});
         DB.addSrc(S.nbId,{type:'image',name:file.name,content:desc});
       } else if(t==='audio'){
         const b64=await f2b64(file);
-        const trans=await callParts([{inlineData:{mimeType:file.type,data:b64}},{text:'Transcribe todo este audio en español.'}]);
+        const trans=await callParts([{inlineData:{mimeType:file.type,data:b64}},{text:'Transcribe todo este audio en español.'}],{onRetry:(waitMs)=>{btn.textContent=`Esperando ${Math.ceil(waitMs/1000)}s...`;}});
         DB.addSrc(S.nbId,{type:'audio',name:file.name,content:trans});
       }
     }
@@ -1455,7 +1703,7 @@ function xport(what,fmt){
   const sess=DB.sess(S.sessId),nb=DB.nb(S.nbId);
   const title=sess?.title||'Clase',date=new Date(sess?.createdAt||Date.now()).toLocaleDateString('es');
   let txt='';
-  if(what==='transcript')txt=S.transcript||'Sin transcripción';
+  if(what==='transcript')txt=getTranscriptText()||'Sin transcripción';
   else if(what==='result')txt=S.lastResult||'Sin resultado generado';
   else{
     txt=`${nb?.name||''} — ${title} (${date})\n${'═'.repeat(50)}\n\nTRANSCRIPCIÓN\n${'─'.repeat(30)}\n${S.transcript||''}`;
@@ -1580,5 +1828,6 @@ window.addEventListener('load',()=>{
   if(code&&fbcfg)setTimeout(cloudSync,2000);
 });
 </script>
-</body>
-</html>
+
+
+</body></html>
