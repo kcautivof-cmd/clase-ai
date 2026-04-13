@@ -1,12 +1,13 @@
 <!DOCTYPE html>
+
 <html lang="es">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
-<meta name="apple-mobile-web-app-capable" content="yes"/>
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
-<meta name="apple-mobile-web-app-title" content="Clase AI"/>
-<meta name="theme-color" content="#0a0b14"/>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
+<meta content="yes" name="apple-mobile-web-app-capable"/>
+<meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"/>
+<meta content="Clase AI" name="apple-mobile-web-app-title"/>
+<meta content="#0a0b14" name="theme-color"/>
 <title>Clase AI</title>
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
@@ -378,318 +379,300 @@ select.mi option{background:var(--s2);}
 </style>
 </head><body>
 <div class="app">
-
 <!-- ═══ TOPBAR ═══ -->
 <div class="topbar">
-  <div class="topbar-bc" id="bc">
-    <span class="bc cur">🎓 Clase AI</span>
-  </div>
-  <div class="topbar-right">
-    <div class="status-pill" id="spill"><span class="dot"></span><span id="spillTxt">Listo</span></div>
-    <div class="t-btn" id="keyBtn" onclick="om('key')">🔑</div>
-  </div>
+<div class="topbar-bc" id="bc">
+<span class="bc cur">🎓 Clase AI</span>
 </div>
-
+<div class="topbar-right">
+<div class="status-pill" id="spill"><span class="dot"></span><span id="spillTxt">Listo</span></div>
+<div class="t-btn" id="keyBtn" onclick="om('key')">🔑</div>
+</div>
+</div>
 <!-- ═══ CONTENT ═══ -->
 <div class="content" id="content">
-
-  <!-- ██ LIBRARY ██ -->
-  <div class="view on" id="v-lib">
-    <div class="lib-toprow">
-      <div class="lib-search-wrap">
-        <input class="lib-search" id="libSearch" placeholder="Buscar cuadernos..." oninput="filterLib(this.value)"/>
-      </div>
-      <div class="t-btn" onclick="restoreBackup()" title="Importar backup">📥</div>
-      <div class="t-btn" onclick="om('sync')" title="Sync nube">☁️</div>
-      <button class="lib-new-btn" onclick="om('folder')">＋ Carpeta</button>
-    </div>
-    <div class="sync-banner" id="syncBanner"></div>
-    <div id="recSection" style="display:none">
-      <div class="sec-label">🕐 Recientes</div>
-      <div class="nb-grid" id="recGrid"></div>
-    </div>
-    <div id="foldersEl"></div>
-    <div class="new-folder-row" onclick="om('folder')">📁 Nueva carpeta · semestre / año</div>
-  </div>
-
-  <!-- ██ NOTEBOOK ██ -->
-  <div class="view" id="v-nb">
-    <div class="nb-hero">
-      <div class="nb-hero-ava" id="nbAva">📓</div>
-      <div class="nb-hero-info">
-        <div class="nb-hero-name" id="nbName">Cuaderno</div>
-        <div class="nb-hero-folder" id="nbFolder">📁 Carpeta</div>
-      </div>
-      <div class="nb-hero-edit" onclick="om('eNb')">✏️</div>
-    </div>
-    <div class="tab-row">
-      <div class="tab on" id="nbt-s" onclick="nbtab('s')">📋 Sesiones</div>
-      <div class="tab" id="nbt-f" onclick="nbtab('f')">📎 Fuentes</div>
-    </div>
-    <div id="nb-s-panel">
-      <div class="rec-big-btn" onclick="goRec()">
-        <span class="rbb-icon">🎙️</span>
-        <div class="rbb-texts">
-          <div class="rbb-title">Grabar nueva clase</div>
-          <div class="rbb-sub">Transcripción en tiempo real · hasta 2h</div>
-        </div>
-      </div>
-      <div id="sessList"></div>
-    </div>
-    <div id="nb-f-panel" style="display:none">
-      <div class="src-add-grid">
-        <div class="src-add-btn" onclick="om('src');setST('file')"><span class="sai">📄</span>Archivo</div>
-        <div class="src-add-btn" onclick="om('src');setST('image')"><span class="sai">🖼️</span>Imagen</div>
-        <div class="src-add-btn" onclick="om('src');setST('audio')"><span class="sai">🎵</span>Audio</div>
-        <div class="src-add-btn" onclick="om('src');setST('youtube')"><span class="sai">▶️</span>YouTube</div>
-        <div class="src-add-btn" onclick="om('src');setST('text')"><span class="sai">✏️</span>Texto</div>
-        <div class="src-add-btn" onclick="om('src');setST('url')"><span class="sai">🔗</span>URL web</div>
-      </div>
-      <div id="srcList"></div>
-    </div>
-  </div>
-
-  <!-- ██ RECORD ██ -->
-  <div class="view" id="v-rec">
-    <div class="rec-hero">
-      <div class="rec-timer" id="recTimer">00:00</div>
-      <div class="rec-status-row">
-        <div class="wave" id="waveEl" style="display:none"><span></span><span></span><span></span><span></span><span></span></div>
-        <div class="sess-pill" id="sessPill">máx 2h</div>
-      </div>
-      <button class="rec-main-btn" id="recBtn" onclick="startRec()">🎙️</button>
-      <div class="rec-ctrl">
-        <button class="ctrl-btn" id="pauseBtn" onclick="pauseRec()" disabled>⏸</button>
-        <button class="ctrl-btn stop" id="stopBtn" onclick="stopRec()" disabled>⏹</button>
-      </div>
-      <div class="rec-label" id="recLabel">Presiona para grabar</div>
-    </div>
-    <div class="sec-label" style="padding-bottom:8px">Transcripción en vivo</div>
-    <div class="live-box" id="liveBox"><span class="ph">La transcripción aparece aquí...</span></div>
-  </div>
-
-  <!-- ██ SESSION ██ -->
-  <div class="view" id="v-sess">
-    <div class="tab-row" id="sessTabs">
-      <div class="tab on" id="st-tools" onclick="stab('tools')">✨</div>
-      <div class="tab" id="st-cards" onclick="stab('cards')">🃏</div>
-      <div class="tab" id="st-quiz" onclick="stab('quiz')">📝</div>
-      <div class="tab" id="st-chat" onclick="stab('chat')">💬</div>
-      <div class="tab" id="st-export" onclick="stab('export')">💾</div>
-    </div>
-
-    <!-- GENERAR -->
-    <div id="sp-tools">
-      <div class="tools-grid">
-        <div class="tool-btn" id="tb-summary"      onclick="runTool('summary')"><span class="ti">📝</span>Resumen</div>
-        <div class="tool-btn" id="tb-outline"      onclick="runTool('outline')"><span class="ti">🗂️</span>Esquema</div>
-        <div class="tool-btn" id="tb-questions"    onclick="runTool('questions')"><span class="ti">❓</span>Preguntas</div>
-        <div class="tool-btn" id="tb-mindmap"      onclick="runTool('mindmap')"><span class="ti">🧠</span>Mapa mental</div>
-        <div class="tool-btn" id="tb-presentation" onclick="runTool('presentation')"><span class="ti">📊</span>Presentación</div>
-        <div class="tool-btn" id="tb-report"       onclick="runTool('report')"><span class="ti">📋</span>Informe</div>
-        <div class="tool-btn" id="tb-infographic"  onclick="runTool('infographic')"><span class="ti">📈</span>Infografía</div>
-        <div class="tool-btn" id="tb-datatable"    onclick="runTool('datatable')"><span class="ti">📊</span>Tabla</div>
-      </div>
-      <div class="result-box" id="resultBox"></div>
-    </div>
-    <!-- TARJETAS -->
-    <div id="sp-cards" style="display:none">
-      <button class="btn btn-p w100" onclick="loadCards()" style="margin-bottom:10px">🃏 Generar tarjetas</button>
-      <div style="font-size:11px;color:var(--muted);text-align:center;margin-bottom:10px">Toca para voltear</div>
-      <div class="fc-grid" id="fcGrid"></div>
-    </div>
-    <!-- PRUEBA -->
-    <div id="sp-quiz" style="display:none">
-      <button class="btn btn-p w100" onclick="loadQuiz()" style="margin-bottom:10px">📝 Generar prueba</button>
-      <div id="quizScore" style="display:none"></div>
-      <div id="quizContainer"></div>
-    </div>
-    <!-- CHAT -->
-    <div id="sp-chat" style="display:none">
-      <div style="font-size:11px;color:var(--muted);margin-bottom:8px">Tutor IA · pregunta sobre la clase y las fuentes</div>
-      <div class="chat-wrap" id="chatWrap"><div class="msg ai">¡Hola! Soy tu tutor. ¿Qué quieres repasar?</div></div>
-      <div class="chat-in">
-        <input type="text" id="chatIn" placeholder="Escribe tu pregunta..." onkeydown="if(event.key==='Enter')sendChat()"/>
-        <button class="chat-send" onclick="sendChat()">➤</button>
-      </div>
-    </div>
-    <!-- EXPORTAR -->
-    <div id="sp-export" style="display:none">
-      <div class="sec-label" style="margin-bottom:10px">Transcripción</div>
-      <div class="exp-grid" style="margin-bottom:14px">
-        <div class="exp-card" onclick="xport('transcript','txt')"><span class="exp-icon">📄</span><span class="exp-title">TXT</span><span class="exp-sub">Texto plano</span></div>
-        <div class="exp-card" onclick="xport('transcript','word')"><span class="exp-icon">🔵</span><span class="exp-title">Word .doc</span><span class="exp-sub">Microsoft Word</span></div>
-      </div>
-      <div class="sec-label" style="margin-bottom:10px">Resultado generado</div>
-      <div class="exp-grid" style="margin-bottom:14px">
-        <div class="exp-card" onclick="xport('result','txt')"><span class="exp-icon">📝</span><span class="exp-title">TXT</span><span class="exp-sub">Texto plano</span></div>
-        <div class="exp-card" onclick="xport('result','word')"><span class="exp-icon">🔵</span><span class="exp-title">Word .doc</span><span class="exp-sub">Formateado</span></div>
-      </div>
-      <div class="sec-label" style="margin-bottom:10px">Todo completo</div>
-      <div class="exp-grid">
-        <div class="exp-card" onclick="xport('all','txt')"><span class="exp-icon">📦</span><span class="exp-title">TXT completo</span><span class="exp-sub">Todo en uno</span></div>
-        <div class="exp-card" onclick="xport('all','word')"><span class="exp-icon">💼</span><span class="exp-title">Word completo</span><span class="exp-sub">Con formato</span></div>
-      </div>
-    </div>
-  </div>
-
+<!-- ██ LIBRARY ██ -->
+<div class="view on" id="v-lib">
+<div class="lib-toprow">
+<div class="lib-search-wrap">
+<input class="lib-search" id="libSearch" oninput="filterLib(this.value)" placeholder="Buscar cuadernos..."/>
+</div>
+<div class="t-btn" onclick="restoreBackup()" title="Importar backup">📥</div>
+<div class="t-btn" onclick="om('sync')" title="Sync nube">☁️</div>
+<button class="lib-new-btn" onclick="om('folder')">＋ Carpeta</button>
+</div>
+<div class="sync-banner" id="syncBanner"></div>
+<div id="recSection" style="display:none">
+<div class="sec-label">🕐 Recientes</div>
+<div class="nb-grid" id="recGrid"></div>
+</div>
+<div id="foldersEl"></div>
+<div class="new-folder-row" onclick="om('folder')">📁 Nueva carpeta · semestre / año</div>
+</div>
+<!-- ██ NOTEBOOK ██ -->
+<div class="view" id="v-nb">
+<div class="nb-hero">
+<div class="nb-hero-ava" id="nbAva">📓</div>
+<div class="nb-hero-info">
+<div class="nb-hero-name" id="nbName">Cuaderno</div>
+<div class="nb-hero-folder" id="nbFolder">📁 Carpeta</div>
+</div>
+<div class="nb-hero-edit" onclick="om('eNb')">✏️</div>
+</div>
+<div class="tab-row">
+<div class="tab on" id="nbt-s" onclick="nbtab('s')">📋 Sesiones</div>
+<div class="tab" id="nbt-f" onclick="nbtab('f')">📎 Fuentes</div>
+</div>
+<div id="nb-s-panel">
+<div class="rec-big-btn" onclick="goRec()">
+<span class="rbb-icon">🎙️</span>
+<div class="rbb-texts">
+<div class="rbb-title">Grabar nueva clase</div>
+<div class="rbb-sub">Transcripción continua por bloques</div>
+</div>
+</div>
+<div id="sessList"></div>
+</div>
+<div id="nb-f-panel" style="display:none">
+<div class="src-add-grid">
+<div class="src-add-btn" onclick="om('src');setST('file')"><span class="sai">📄</span>Archivo</div>
+<div class="src-add-btn" onclick="om('src');setST('image')"><span class="sai">🖼️</span>Imagen</div>
+<div class="src-add-btn" onclick="om('src');setST('audio')"><span class="sai">🎵</span>Audio</div>
+<div class="src-add-btn" onclick="om('src');setST('youtube')"><span class="sai">▶️</span>YouTube</div>
+<div class="src-add-btn" onclick="om('src');setST('text')"><span class="sai">✏️</span>Texto</div>
+<div class="src-add-btn" onclick="om('src');setST('url')"><span class="sai">🔗</span>URL web</div>
+</div>
+<div id="srcList"></div>
+</div>
+</div>
+<!-- ██ RECORD ██ -->
+<div class="view" id="v-rec">
+<div class="rec-hero">
+<div class="rec-timer" id="recTimer">00:00</div>
+<div class="rec-status-row">
+<div class="wave" id="waveEl" style="display:none"><span></span><span></span><span></span><span></span><span></span></div>
+<div class="sess-pill" id="sessPill">sin límite práctico</div>
+</div>
+<button class="rec-main-btn" id="recBtn" onclick="startRec()">🎙️</button>
+<div class="rec-ctrl">
+<button class="ctrl-btn" disabled="" id="pauseBtn" onclick="pauseRec()">⏸</button>
+<button class="ctrl-btn stop" disabled="" id="stopBtn" onclick="stopRec()">⏹</button>
+</div>
+<div class="rec-label" id="recLabel">Presiona para grabar</div>
+</div>
+<div class="sec-label" style="padding-bottom:8px">Transcripción en vivo</div>
+<div class="live-box" id="liveBox"><span class="ph">La transcripción aparece aquí...</span></div>
+</div>
+<!-- ██ SESSION ██ -->
+<div class="view" id="v-sess">
+<div class="tab-row" id="sessTabs">
+<div class="tab on" id="st-tools" onclick="stab('tools')">✨</div>
+<div class="tab" id="st-cards" onclick="stab('cards')">🃏</div>
+<div class="tab" id="st-quiz" onclick="stab('quiz')">📝</div>
+<div class="tab" id="st-chat" onclick="stab('chat')">💬</div>
+<div class="tab" id="st-export" onclick="stab('export')">💾</div>
+</div>
+<!-- GENERAR -->
+<div id="sp-tools">
+<div class="tools-grid">
+<div class="tool-btn" id="tb-summary" onclick="runTool('summary')"><span class="ti">📝</span>Resumen</div>
+<div class="tool-btn" id="tb-outline" onclick="runTool('outline')"><span class="ti">🗂️</span>Esquema</div>
+<div class="tool-btn" id="tb-questions" onclick="runTool('questions')"><span class="ti">❓</span>Preguntas</div>
+<div class="tool-btn" id="tb-mindmap" onclick="runTool('mindmap')"><span class="ti">🧠</span>Mapa mental</div>
+<div class="tool-btn" id="tb-presentation" onclick="runTool('presentation')"><span class="ti">📊</span>Presentación</div>
+<div class="tool-btn" id="tb-report" onclick="runTool('report')"><span class="ti">📋</span>Informe</div>
+<div class="tool-btn" id="tb-infographic" onclick="runTool('infographic')"><span class="ti">📈</span>Infografía</div>
+<div class="tool-btn" id="tb-datatable" onclick="runTool('datatable')"><span class="ti">📊</span>Tabla</div>
+</div>
+<div class="result-box" id="resultBox"></div>
+</div>
+<!-- TARJETAS -->
+<div id="sp-cards" style="display:none">
+<button class="btn btn-p w100" onclick="loadCards()" style="margin-bottom:10px">🃏 Generar tarjetas</button>
+<div style="font-size:11px;color:var(--muted);text-align:center;margin-bottom:10px">Toca para voltear</div>
+<div class="fc-grid" id="fcGrid"></div>
+</div>
+<!-- PRUEBA -->
+<div id="sp-quiz" style="display:none">
+<button class="btn btn-p w100" onclick="loadQuiz()" style="margin-bottom:10px">📝 Generar prueba</button>
+<div id="quizScore" style="display:none"></div>
+<div id="quizContainer"></div>
+</div>
+<!-- CHAT -->
+<div id="sp-chat" style="display:none">
+<div style="font-size:11px;color:var(--muted);margin-bottom:8px">Tutor IA · pregunta sobre la clase y las fuentes</div>
+<div class="chat-wrap" id="chatWrap"><div class="msg ai">¡Hola! Soy tu tutor. ¿Qué quieres repasar?</div></div>
+<div class="chat-in">
+<input id="chatIn" onkeydown="if(event.key==='Enter')sendChat()" placeholder="Escribe tu pregunta..." type="text"/>
+<button class="chat-send" onclick="sendChat()">➤</button>
+</div>
+</div>
+<!-- EXPORTAR -->
+<div id="sp-export" style="display:none">
+<div class="sec-label" style="margin-bottom:10px">Transcripción</div>
+<div class="exp-grid" style="margin-bottom:14px">
+<div class="exp-card" onclick="xport('transcript','txt')"><span class="exp-icon">📄</span><span class="exp-title">TXT</span><span class="exp-sub">Texto plano</span></div>
+<div class="exp-card" onclick="xport('transcript','word')"><span class="exp-icon">🔵</span><span class="exp-title">Word .doc</span><span class="exp-sub">Microsoft Word</span></div>
+</div>
+<div class="sec-label" style="margin-bottom:10px">Resultado generado</div>
+<div class="exp-grid" style="margin-bottom:14px">
+<div class="exp-card" onclick="xport('result','txt')"><span class="exp-icon">📝</span><span class="exp-title">TXT</span><span class="exp-sub">Texto plano</span></div>
+<div class="exp-card" onclick="xport('result','word')"><span class="exp-icon">🔵</span><span class="exp-title">Word .doc</span><span class="exp-sub">Formateado</span></div>
+</div>
+<div class="sec-label" style="margin-bottom:10px">Todo completo</div>
+<div class="exp-grid">
+<div class="exp-card" onclick="xport('all','txt')"><span class="exp-icon">📦</span><span class="exp-title">TXT completo</span><span class="exp-sub">Todo en uno</span></div>
+<div class="exp-card" onclick="xport('all','word')"><span class="exp-icon">💼</span><span class="exp-title">Word completo</span><span class="exp-sub">Con formato</span></div>
+</div>
+</div>
+</div>
 </div><!-- /content -->
-
 <!-- ═══ BOTTOM NAV (solo en sesión) ═══ -->
 <nav class="bnav" id="bnav" style="display:none">
-  <div class="bnav-item on" id="bn-tools" onclick="stab('tools')"><span class="bi">✨</span>Generar</div>
-  <div class="bnav-item"    id="bn-cards" onclick="stab('cards')"><span class="bi">🃏</span>Tarjetas</div>
-  <div class="bnav-item"    id="bn-quiz"  onclick="stab('quiz')"> <span class="bi">📝</span>Prueba</div>
-  <div class="bnav-item"    id="bn-chat"  onclick="stab('chat')"> <span class="bi">💬</span>Tutor</div>
-  <div class="bnav-item"    id="bn-export" onclick="stab('export')"><span class="bi">💾</span>Exportar</div>
+<div class="bnav-item on" id="bn-tools" onclick="stab('tools')"><span class="bi">✨</span>Generar</div>
+<div class="bnav-item" id="bn-cards" onclick="stab('cards')"><span class="bi">🃏</span>Tarjetas</div>
+<div class="bnav-item" id="bn-quiz" onclick="stab('quiz')"> <span class="bi">📝</span>Prueba</div>
+<div class="bnav-item" id="bn-chat" onclick="stab('chat')"> <span class="bi">💬</span>Tutor</div>
+<div class="bnav-item" id="bn-export" onclick="stab('export')"><span class="bi">💾</span>Exportar</div>
 </nav>
 </div><!-- /app -->
-
 <!-- ═══════════ MODALS ═══════════ -->
-
 <!-- API KEY -->
 <div class="overlay" id="m-key" onclick="if(event.target===this)cm('key')">
-  <div class="modal">
-    <div class="modal-title">🔑 API Key de Gemini</div>
-    <input type="password" class="mi" id="apiIn" placeholder="Pega tu API key aquí"/>
-    <div class="hint">Obtén tu key gratis en <a href="https://aistudio.google.com/apikey" target="_blank">aistudio.google.com/apikey</a><br/>Se guarda solo en tu dispositivo.</div>
-    <div class="row"><button class="btn btn-g" onclick="cm('key')" style="flex:1">Cancelar</button><button class="btn btn-p" onclick="saveKey()" style="flex:2">Guardar</button></div>
-  </div>
+<div class="modal">
+<div class="modal-title">🔑 API Key de Gemini</div>
+<input class="mi" id="apiIn" placeholder="Pega tu API key aquí" type="password"/>
+<div class="hint">Obtén tu key gratis en <a href="https://aistudio.google.com/apikey" target="_blank">aistudio.google.com/apikey</a><br/>Se guarda solo en tu dispositivo.</div>
+<div class="row"><button class="btn btn-g" onclick="cm('key')" style="flex:1">Cancelar</button><button class="btn btn-p" onclick="saveKey()" style="flex:2">Guardar</button></div>
 </div>
-
+</div>
 <!-- SYNC / FIREBASE -->
 <div class="overlay" id="m-sync" onclick="if(event.target===this)cm('sync')">
-  <div class="modal">
-    <div class="modal-title">☁️ Sincronización entre dispositivos</div>
-    <div class="ml">Código de sincronización</div>
-    <input type="text" class="mi" id="syncCode" placeholder="Ej: kevin-clases-2026"/>
-    <div class="hint">
+<div class="modal">
+<div class="modal-title">☁️ Sincronización entre dispositivos</div>
+<div class="ml">Código de sincronización</div>
+<input class="mi" id="syncCode" placeholder="Ej: kevin-clases-2026" type="text"/>
+<div class="hint">
       Usa el mismo código en tu iPhone y PC para compartir todos tus cuadernos automáticamente.<br/>
       Requiere una config de Firebase gratuita. <a href="https://console.firebase.google.com" target="_blank">Crear proyecto Firebase →</a>
-    </div>
-    <div class="ml">Firebase Config (pega el objeto JSON)</div>
-    <textarea class="mi" id="fbConfig" placeholder='{"apiKey":"...","authDomain":"...","projectId":"..."}'></textarea>
-    <div class="row" style="margin-top:10px">
-      <button class="btn btn-g" onclick="cm('sync')" style="flex:1">Cancelar</button>
-      <button class="btn btn-g" onclick="restoreBackup()" style="flex:1">📥 Backup</button>
-      <button class="btn btn-p" onclick="saveSyncConf()" style="flex:2">Guardar y sincronizar</button>
-    </div>
-    <div style="margin-top:10px">
-      <button class="btn btn-g w100" onclick="exportBackup()">☁️ Exportar backup JSON</button>
-    </div>
-  </div>
 </div>
-
+<div class="ml">Firebase Config (pega el objeto JSON)</div>
+<textarea class="mi" id="fbConfig" placeholder='{"apiKey":"...","authDomain":"...","projectId":"..."}'></textarea>
+<div class="row" style="margin-top:10px">
+<button class="btn btn-g" onclick="cm('sync')" style="flex:1">Cancelar</button>
+<button class="btn btn-g" onclick="restoreBackup()" style="flex:1">📥 Backup</button>
+<button class="btn btn-p" onclick="saveSyncConf()" style="flex:2">Guardar y sincronizar</button>
+</div>
+<div style="margin-top:10px">
+<button class="btn btn-g w100" onclick="exportBackup()">☁️ Exportar backup JSON</button>
+</div>
+</div>
+</div>
 <!-- NUEVA CARPETA -->
 <div class="overlay" id="m-folder" onclick="if(event.target===this)cm('folder')">
-  <div class="modal">
-    <div class="modal-title" id="folderMT">📁 Nueva carpeta</div>
-    <div class="ml">Nombre</div>
-    <input type="text" class="mi" id="folderName" placeholder="ej: 2026 - Semestre 1"/>
-    <div class="ml">Color</div>
-    <div class="color-row" id="folderColors"></div>
-    <input type="hidden" id="folderEId"/>
-    <div class="row" style="margin-top:14px">
-      <button class="btn btn-g" onclick="cm('folder')" style="flex:1">Cancelar</button>
-      <button class="btn btn-r" id="folderDelBtn" onclick="delFolder()" style="display:none">🗑</button>
-      <button class="btn btn-p" onclick="saveFolder()" style="flex:2">Guardar</button>
-    </div>
-  </div>
+<div class="modal">
+<div class="modal-title" id="folderMT">📁 Nueva carpeta</div>
+<div class="ml">Nombre</div>
+<input class="mi" id="folderName" placeholder="ej: 2026 - Semestre 1" type="text"/>
+<div class="ml">Color</div>
+<div class="color-row" id="folderColors"></div>
+<input id="folderEId" type="hidden"/>
+<div class="row" style="margin-top:14px">
+<button class="btn btn-g" onclick="cm('folder')" style="flex:1">Cancelar</button>
+<button class="btn btn-r" id="folderDelBtn" onclick="delFolder()" style="display:none">🗑</button>
+<button class="btn btn-p" onclick="saveFolder()" style="flex:2">Guardar</button>
 </div>
-
+</div>
+</div>
 <!-- NUEVO CUADERNO -->
 <div class="overlay" id="m-nb" onclick="if(event.target===this)cm('nb')">
-  <div class="modal">
-    <div class="modal-title" id="nbMT">📓 Nuevo cuaderno</div>
-    <div class="ml">Nombre</div>
-    <input type="text" class="mi" id="nbNameIn" placeholder="ej: Psicología"/>
-    <div class="ml">Ícono</div>
-    <div class="icon-grid" id="nbIcons"></div>
-    <div class="ml">Color</div>
-    <div class="color-row" id="nbColors"></div>
-    <input type="hidden" id="nbEId"/>
-    <input type="hidden" id="nbFId"/>
-    <div class="row" style="margin-top:14px">
-      <button class="btn btn-g" onclick="cm('nb')" style="flex:1">Cancelar</button>
-      <button class="btn btn-r" id="nbDelBtn" onclick="delNb()" style="display:none">🗑</button>
-      <button class="btn btn-p" onclick="saveNb()" style="flex:2">Guardar</button>
-    </div>
-  </div>
+<div class="modal">
+<div class="modal-title" id="nbMT">📓 Nuevo cuaderno</div>
+<div class="ml">Nombre</div>
+<input class="mi" id="nbNameIn" placeholder="ej: Psicología" type="text"/>
+<div class="ml">Ícono</div>
+<div class="icon-grid" id="nbIcons"></div>
+<div class="ml">Color</div>
+<div class="color-row" id="nbColors"></div>
+<input id="nbEId" type="hidden"/>
+<input id="nbFId" type="hidden"/>
+<div class="row" style="margin-top:14px">
+<button class="btn btn-g" onclick="cm('nb')" style="flex:1">Cancelar</button>
+<button class="btn btn-r" id="nbDelBtn" onclick="delNb()" style="display:none">🗑</button>
+<button class="btn btn-p" onclick="saveNb()" style="flex:2">Guardar</button>
 </div>
-
+</div>
+</div>
 <!-- EDITAR CUADERNO (desde dentro) -->
 <div class="overlay" id="m-eNb" onclick="if(event.target===this)cm('eNb')">
-  <div class="modal">
-    <div class="modal-title">✏️ Editar cuaderno</div>
-    <div class="ml">Nombre</div>
-    <input type="text" class="mi" id="eNbName" placeholder="Nombre"/>
-    <div class="ml">Ícono</div>
-    <div class="icon-grid" id="eNbIcons"></div>
-    <div class="ml">Color</div>
-    <div class="color-row" id="eNbColors"></div>
-    <div class="row" style="margin-top:14px">
-      <button class="btn btn-r" onclick="delCurNb()" style="flex:1">🗑 Eliminar</button>
-      <button class="btn btn-p" onclick="saveENb()" style="flex:2">Guardar</button>
-    </div>
-  </div>
+<div class="modal">
+<div class="modal-title">✏️ Editar cuaderno</div>
+<div class="ml">Nombre</div>
+<input class="mi" id="eNbName" placeholder="Nombre" type="text"/>
+<div class="ml">Ícono</div>
+<div class="icon-grid" id="eNbIcons"></div>
+<div class="ml">Color</div>
+<div class="color-row" id="eNbColors"></div>
+<div class="row" style="margin-top:14px">
+<button class="btn btn-r" onclick="delCurNb()" style="flex:1">🗑 Eliminar</button>
+<button class="btn btn-p" onclick="saveENb()" style="flex:2">Guardar</button>
 </div>
-
+</div>
+</div>
 <!-- AGREGAR FUENTE -->
 <div class="overlay" id="m-src" onclick="if(event.target===this)cm('src')">
-  <div class="modal">
-    <div class="modal-title">📎 Agregar fuente</div>
-    <div class="src-type-grid">
-      <div class="stc on" id="stype-file"    onclick="setST('file')">   <span class="si">📄</span>Archivo</div>
-      <div class="stc"    id="stype-image"   onclick="setST('image')">  <span class="si">🖼️</span>Imagen</div>
-      <div class="stc"    id="stype-audio"   onclick="setST('audio')">  <span class="si">🎵</span>Audio</div>
-      <div class="stc"    id="stype-youtube" onclick="setST('youtube')"><span class="si">▶️</span>YouTube</div>
-      <div class="stc"    id="stype-text"    onclick="setST('text')">   <span class="si">✏️</span>Texto</div>
-      <div class="stc"    id="stype-url"     onclick="setST('url')">    <span class="si">🔗</span>URL</div>
-    </div>
-    <div id="srcInputArea"></div>
-    <div class="row" style="margin-top:12px">
-      <button class="btn btn-g" onclick="cm('src')" style="flex:1">Cancelar</button>
-      <button class="btn btn-p" onclick="addSrc()" id="srcAddBtn" style="flex:2">Agregar</button>
-    </div>
-  </div>
+<div class="modal">
+<div class="modal-title">📎 Agregar fuente</div>
+<div class="src-type-grid">
+<div class="stc on" id="stype-file" onclick="setST('file')"> <span class="si">📄</span>Archivo</div>
+<div class="stc" id="stype-image" onclick="setST('image')"> <span class="si">🖼️</span>Imagen</div>
+<div class="stc" id="stype-audio" onclick="setST('audio')"> <span class="si">🎵</span>Audio</div>
+<div class="stc" id="stype-youtube" onclick="setST('youtube')"><span class="si">▶️</span>YouTube</div>
+<div class="stc" id="stype-text" onclick="setST('text')"> <span class="si">✏️</span>Texto</div>
+<div class="stc" id="stype-url" onclick="setST('url')"> <span class="si">🔗</span>URL</div>
 </div>
-
+<div id="srcInputArea"></div>
+<div class="row" style="margin-top:12px">
+<button class="btn btn-g" onclick="cm('src')" style="flex:1">Cancelar</button>
+<button class="btn btn-p" id="srcAddBtn" onclick="addSrc()" style="flex:2">Agregar</button>
+</div>
+</div>
+</div>
 <!-- GUARDAR SESIÓN -->
 <div class="overlay" id="m-save">
-  <div class="modal">
-    <div class="modal-title">💾 Guardar sesión</div>
-    <div class="ml">Título de la clase</div>
-    <input type="text" class="mi" id="sessTitle" placeholder="ej: Clase 1 – Introducción"/>
-    <div class="row" style="margin-top:12px">
-      <button class="btn btn-g" onclick="saveSess(false)" style="flex:1">Sin título</button>
-      <button class="btn btn-p" onclick="saveSess(true)" style="flex:2">Guardar</button>
-    </div>
-  </div>
+<div class="modal">
+<div class="modal-title">💾 Guardar sesión</div>
+<div class="ml">Título de la clase</div>
+<input class="mi" id="sessTitle" placeholder="ej: Clase 1 – Introducción" type="text"/>
+<div class="row" style="margin-top:12px">
+<button class="btn btn-g" onclick="saveSess(false)" style="flex:1">Sin título</button>
+<button class="btn btn-p" onclick="saveSess(true)" style="flex:2">Guardar</button>
 </div>
-
+</div>
+</div>
 <!-- OPCIONES SESIÓN -->
 <div class="overlay" id="m-sopt" onclick="if(event.target===this)cm('sopt')">
-  <div class="modal">
-    <div class="modal-title">⚙️ Opciones de sesión</div>
-    <div class="ml">Renombrar</div>
-    <input type="text" class="mi" id="sessRename" placeholder="Nuevo nombre"/>
-    <div class="row" style="margin-top:12px">
-      <button class="btn btn-r" onclick="delCurSess()" style="flex:1">🗑 Eliminar</button>
-      <button class="btn btn-p" onclick="renameSess()" style="flex:2">Renombrar</button>
-    </div>
-  </div>
+<div class="modal">
+<div class="modal-title">⚙️ Opciones de sesión</div>
+<div class="ml">Renombrar</div>
+<input class="mi" id="sessRename" placeholder="Nuevo nombre" type="text"/>
+<div class="row" style="margin-top:12px">
+<button class="btn btn-r" onclick="delCurSess()" style="flex:1">🗑 Eliminar</button>
+<button class="btn btn-p" onclick="renameSess()" style="flex:2">Renombrar</button>
 </div>
-
+</div>
+</div>
 <script>
 // ═══════════════════════════════════════════════════════════════
 //  CONFIG & CONSTANTS
 // ═══════════════════════════════════════════════════════════════
-const LIVE_WS  = k=>`wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContent?key=${k}`;
-const REST_URL = k=>`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${k}`;
-const LIVE_MODEL = 'models/gemini-2.5-flash-preview-native-audio-dialog';
+const BUILTIN_API_KEY = 'AIzaSyBM6bvhbx-hwoJwUiK9wiXNFx_2mv4dl-U';
+const REST_MODEL = 'gemini-2.5-flash';
+const REST_URL = k=>`https://generativelanguage.googleapis.com/v1beta/models/${REST_MODEL}:generateContent?key=${k}`;
+const TRANSCRIBE_CHUNK_SECONDS = 12;
+const TRANSCRIBE_MIN_FINAL_SECONDS = 2;
 const COLORS  = ['#7c6fff','#a78bfa','#22c55e','#06b6d4','#f97316','#ef4444','#eab308','#ec4899','#14b8a6','#3b82f6'];
 const ICONS   = ['📓','🧠','🔬','⚗️','📐','🌎','💊','⚖️','💻','📖','🎭','🎵','🏛️','🧬','📊','🌱','🔭','✍️','🎓','🏥','🧪','📡'];
-const MAX_SESS = 8;
 
 // ═══════════════════════════════════════════════════════════════
 //  STATE
@@ -698,9 +681,11 @@ const S = {
   view:'lib', nbId:null, sessId:null,
   transcript:'', lastResult:'', lastTool:null,
   isRec:false, isPaused:false, stopped:false,
-  secs:0, sessN:1,
-  ws:null, stream:null, actx:null, proc:null, src_node:null,
+  secs:0,
+  stream:null, actx:null, proc:null, src_node:null,
   wl:null, ti:null,
+  captureRate:16000, chunkFloatParts:[], chunkFloatSamples:0,
+  transcribeQueue:[], transcribing:false, pendingStop:false, chunkCounter:0,
   qAns:[], qOk:0,
   selFColor:COLORS[0], selNbIcon:ICONS[0], selNbColor:COLORS[0],
   eNbIcon:ICONS[0], eNbColor:COLORS[0], srcType:'file'
@@ -741,7 +726,7 @@ const DB = {
 // ═══════════════════════════════════════════════════════════════
 //  API KEY
 // ═══════════════════════════════════════════════════════════════
-const gk=()=>localStorage.getItem('claseai_key')||'';
+const gk=()=>localStorage.getItem('claseai_key')||BUILTIN_API_KEY||'';
 function saveKey(){
   const k=document.getElementById('apiIn').value.trim();
   if(!k){alert('Pega tu API key');return;}
@@ -1060,60 +1045,193 @@ function stab(t){
 // ═══════════════════════════════════════════════════════════════
 function setPill(txt,cls=''){document.getElementById('spillTxt').textContent=txt;document.getElementById('spill').className='status-pill'+(cls?' '+cls:'');}
 function setLabel(txt){document.getElementById('recLabel').textContent=txt;}
-
-async function startRec(reconnect=false){
+function escHtml(s=''){return s.replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
+function renderTranscript(){
+  const box=document.getElementById('liveBox');
+  if(!S.transcript.trim()){box.innerHTML='<span class="ph">La transcripción aparece aquí...</span>';return;}
+  box.innerHTML='<p>'+escHtml(S.transcript).replace(/\n{2,}/g,'</p><p>').replace(/\n/g,'<br/>')+'</p>';
+  box.scrollTop=999999;
+}
+function resetRecState(){
+  S.transcript='';
+  S.secs=0;
+  S.stopped=false;
+  S.isRec=false;
+  S.isPaused=false;
+  S.captureRate=16000;
+  S.chunkFloatParts=[];
+  S.chunkFloatSamples=0;
+  S.transcribeQueue=[];
+  S.transcribing=false;
+  S.pendingStop=false;
+  S.chunkCounter=0;
+  updTimer();
+  renderTranscript();
+}
+function mergeFloatBuffers(parts,total){
+  const merged=new Float32Array(total);
+  let offset=0;
+  for(const part of parts){merged.set(part,offset);offset+=part.length;}
+  return merged;
+}
+function downsampleTo16k(input,sampleRate){
+  if(!input?.length)return new Int16Array();
+  if(sampleRate===16000){
+    const out=new Int16Array(input.length);
+    for(let i=0;i<input.length;i++)out[i]=Math.max(-32768,Math.min(32767,Math.round(input[i]*32767)));
+    return out;
+  }
+  const ratio=sampleRate/16000;
+  const newLen=Math.max(1,Math.round(input.length/ratio));
+  const out=new Int16Array(newLen);
+  let offsetResult=0,offsetBuffer=0;
+  while(offsetResult<newLen){
+    const nextOffset=Math.min(input.length,Math.round((offsetResult+1)*ratio));
+    let accum=0,count=0;
+    for(let i=offsetBuffer;i<nextOffset;i++){accum+=input[i];count++;}
+    const sample=count?accum/count:input[Math.min(offsetBuffer,input.length-1)]||0;
+    out[offsetResult]=Math.max(-32768,Math.min(32767,Math.round(sample*32767)));
+    offsetResult++;
+    offsetBuffer=nextOffset;
+  }
+  return out;
+}
+function pcm16ToWavBase64(samples,sampleRate=16000){
+  const bytesPerSample=2;
+  const buffer=new ArrayBuffer(44+samples.length*bytesPerSample);
+  const view=new DataView(buffer);
+  const writeString=(offset,str)=>{for(let i=0;i<str.length;i++)view.setUint8(offset+i,str.charCodeAt(i));};
+  writeString(0,'RIFF');
+  view.setUint32(4,36+samples.length*bytesPerSample,true);
+  writeString(8,'WAVE');
+  writeString(12,'fmt ');
+  view.setUint32(16,16,true);
+  view.setUint16(20,1,true);
+  view.setUint16(22,1,true);
+  view.setUint32(24,sampleRate,true);
+  view.setUint32(28,sampleRate*bytesPerSample,true);
+  view.setUint16(32,bytesPerSample,true);
+  view.setUint16(34,16,true);
+  writeString(36,'data');
+  view.setUint32(40,samples.length*bytesPerSample,true);
+  let offset=44;
+  for(let i=0;i<samples.length;i++,offset+=2)view.setInt16(offset,samples[i],true);
+  const bytes=new Uint8Array(buffer);
+  let binary='';
+  for(let i=0;i<bytes.length;i+=0x8000)binary+=String.fromCharCode(...bytes.subarray(i,i+0x8000));
+  return btoa(binary);
+}
+function extractTextFromResponse(d){
+  return (d?.candidates||[])
+    .flatMap(c=>c?.content?.parts||[])
+    .map(p=>p?.text||'')
+    .join('')
+    .trim();
+}
+async function transcribeChunk(base64Wav){
+  const prompt='Transcribe literalmente este fragmento de audio. Devuelve solo la transcripción en español, sin resumen, sin traducción, sin comentarios y sin encabezados.';
+  const r=await fetch(REST_URL(gk()),{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({
+      generationConfig:{temperature:0},
+      contents:[{parts:[
+        {text:prompt},
+        {inlineData:{mimeType:'audio/wav',data:base64Wav}}
+      ]}]
+    })
+  });
+  const d=await r.json();
+  if(d.error)throw new Error(d.error.message||'No se pudo transcribir');
+  return extractTextFromResponse(d);
+}
+function appendTranscript(t){
+  const clean=(t||'').trim();
+  if(!clean)return;
+  S.transcript+=(S.transcript?'\n\n':'')+clean;
+  renderTranscript();
+}
+function cleanupCapture(){
+  ['proc','src_node'].forEach(k=>{if(S[k]){try{S[k].disconnect();}catch(e){}S[k]=null;}});
+  if(S.actx&&S.actx.state!=='closed'){try{S.actx.close();}catch(e){}S.actx=null;}
+  if(S.stream){S.stream.getTracks().forEach(t=>t.stop());S.stream=null;}
+  if(S.wl){try{S.wl.release();}catch(e){}S.wl=null;}
+}
+function maybeFinishAfterDrain(){
+  if(S.pendingStop&&!S.transcribing&&!S.transcribeQueue.length)finishRec();
+}
+async function processTranscribeQueue(){
+  if(S.transcribing||!S.transcribeQueue.length)return;
+  S.transcribing=true;
+  const current=S.transcribeQueue.shift();
+  try{
+    const txt=await transcribeChunk(current.b64);
+    appendTranscript(txt);
+    if(S.pendingStop)setLabel('Finalizando transcripción...');
+    else if(S.isPaused)setLabel('Pausado — bloque procesado');
+    else if(S.isRec)setLabel('Grabando...');
+  }catch(e){
+    console.error('Transcription error',e);
+    setPill('Error','warn');
+    setLabel('Error al transcribir un bloque, la grabación sigue');
+  }finally{
+    S.transcribing=false;
+    if(S.isRec&&!S.pendingStop)setPill('Grabando','rec');
+    if(S.transcribeQueue.length)processTranscribeQueue();
+    else maybeFinishAfterDrain();
+  }
+}
+function flushChunk(force=false){
+  if(!S.chunkFloatSamples)return;
+  const minSamples=Math.max(1,Math.floor((force?TRANSCRIBE_MIN_FINAL_SECONDS:TRANSCRIBE_CHUNK_SECONDS)*S.captureRate));
+  if(!force&&S.chunkFloatSamples<minSamples)return;
+  const merged=mergeFloatBuffers(S.chunkFloatParts,S.chunkFloatSamples);
+  S.chunkFloatParts=[];
+  S.chunkFloatSamples=0;
+  const pcm16=downsampleTo16k(merged,S.captureRate);
+  if(pcm16.length<800)return;
+  const b64=pcm16ToWavBase64(pcm16,16000);
+  S.transcribeQueue.push({id:++S.chunkCounter,b64});
+  processTranscribeQueue();
+}
+async function startRec(){
   if(!gk()){om('key');return;}
   if(!S.nbId)return;
-  if(!reconnect){
-    try{S.stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true}});}
-    catch(e){alert('Sin acceso al micrófono:\n'+e.message);return;}
-    S.secs=0;S.sessN=1;S.transcript='';S.stopped=false;S.isRec=true;S.isPaused=false;
-    document.getElementById('liveBox').innerHTML='<span class="ph">Escuchando...</span>';
-    document.getElementById('recBtn').disabled=true;
-    document.getElementById('recBtn').classList.add('active');
-    document.getElementById('pauseBtn').disabled=false;
-    document.getElementById('stopBtn').disabled=false;
-    S.ti=setInterval(()=>{S.secs++;updTimer();},1000);
-    try{if('wakeLock' in navigator)S.wl=await navigator.wakeLock.request('screen');}catch(e){}
-  }
-  if(!S.actx||S.actx.state==='closed'){
-    S.actx=new(window.AudioContext||window.webkitAudioContext)({sampleRate:16000});
-    if(S.actx.state==='suspended')await S.actx.resume();
-  }
+  try{S.stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,channelCount:1}});}
+  catch(e){alert('Sin acceso al micrófono:\n'+e.message);return;}
+  resetRecState();
+  S.isRec=true;
+  document.getElementById('recBtn').disabled=true;
+  document.getElementById('recBtn').classList.add('active');
+  document.getElementById('pauseBtn').disabled=false;
+  document.getElementById('stopBtn').disabled=false;
+  document.getElementById('sessPill').textContent='sin límite práctico';
+  setPill('Grabando','rec');
+  setLabel('Grabando...');
+  document.getElementById('waveEl').style.display='flex';
+  renderTranscript();
+  S.ti=setInterval(()=>{S.secs++;updTimer();},1000);
+  try{if('wakeLock' in navigator)S.wl=await navigator.wakeLock.request('screen');}catch(e){}
+  S.actx=new(window.AudioContext||window.webkitAudioContext)();
+  if(S.actx.state==='suspended')await S.actx.resume();
+  S.captureRate=S.actx.sampleRate||48000;
   S.src_node=S.actx.createMediaStreamSource(S.stream);
   S.proc=S.actx.createScriptProcessor(4096,1,1);
-  const ws=new WebSocket(LIVE_WS(gk()));S.ws=ws;
-  document.getElementById('sessPill').textContent=`Sesión ${S.sessN}/${MAX_SESS} · máx 2h`;
-  setLabel(`Grabando · sesión ${S.sessN}`);
-  ws.onopen=()=>{
-    ws.send(JSON.stringify({setup:{model:LIVE_MODEL,generationConfig:{responseModalities:['TEXT']},inputAudioTranscription:{},systemInstruction:{parts:[{text:'Transcribe exactamente lo que escuchas en español. Solo transcribe, no respondas.'}]}}}));
-    setPill('Grabando','rec');document.getElementById('waveEl').style.display='flex';
-  };
-  ws.onmessage=e=>{
-    const m=JSON.parse(e.data),t=m.serverContent?.inputTranscription?.text?.trim();
-    if(t){
-      if(!S.transcript)document.getElementById('liveBox').innerHTML='';
-      S.transcript+=(S.transcript?' ':'')+t;
-      document.getElementById('liveBox').innerHTML='<p>'+S.transcript.replace(/\n/g,'</p><p>')+'</p>';
-      document.getElementById('liveBox').scrollTop=9999;
-    }
-  };
-  ws.onclose=()=>{
-    if(!S.stopped&&S.isRec&&S.sessN<MAX_SESS){S.sessN++;setTimeout(()=>startRec(true),800);}
-    else if(!S.stopped){setLabel('Límite de 2h alcanzado');finishRec();}
-  };
   S.proc.onaudioprocess=ev=>{
-    if(!S.isRec||S.isPaused||!S.ws||S.ws.readyState!==1)return;
-    const f=ev.inputBuffer.getChannelData(0),i16=new Int16Array(f.length);
-    for(let i=0;i<f.length;i++)i16[i]=Math.max(-32768,Math.min(32767,Math.round(f[i]*32767)));
-    const b=new Uint8Array(i16.buffer);let s='';
-    for(let i=0;i<b.length;i+=8192)s+=String.fromCharCode(...b.subarray(i,i+8192));
-    ws.send(JSON.stringify({realtimeInput:{audio:{mimeType:`audio/pcm;rate=${S.actx.sampleRate}`,data:btoa(s)}}}));
+    if(!S.isRec||S.isPaused||S.pendingStop)return;
+    const input=ev.inputBuffer.getChannelData(0);
+    const copy=new Float32Array(input.length);
+    copy.set(input);
+    S.chunkFloatParts.push(copy);
+    S.chunkFloatSamples+=copy.length;
+    if(S.chunkFloatSamples>=Math.floor(S.captureRate*TRANSCRIBE_CHUNK_SECONDS))flushChunk(false);
   };
-  S.src_node.connect(S.proc);S.proc.connect(S.actx.destination);
+  S.src_node.connect(S.proc);
+  S.proc.connect(S.actx.destination);
 }
 function pauseRec(){
-  if(!S.isRec)return;S.isPaused=!S.isPaused;
+  if(!S.isRec||S.pendingStop)return;
+  S.isPaused=!S.isPaused;
   document.getElementById('pauseBtn').textContent=S.isPaused?'▶':'⏸';
   document.getElementById('waveEl').style.display=S.isPaused?'none':'flex';
   setPill(S.isPaused?'Pausado':'Grabando',S.isPaused?'warn':'rec');
@@ -1121,25 +1239,33 @@ function pauseRec(){
   if(S.isPaused){clearInterval(S.ti);}else{S.ti=setInterval(()=>{S.secs++;updTimer();},1000);}
 }
 function stopRec(){
+  if(S.pendingStop)return;
   S.stopped=true;
-  if(S.ws&&S.ws.readyState===1){S.ws.send(JSON.stringify({clientContent:{turnComplete:true}}));setTimeout(finishRec,600);}
-  else finishRec();
+  S.pendingStop=true;
+  S.isRec=false;
+  clearInterval(S.ti);
+  document.getElementById('pauseBtn').disabled=true;
+  document.getElementById('stopBtn').disabled=true;
+  document.getElementById('waveEl').style.display='none';
+  setPill('Procesando','warn');
+  setLabel('Finalizando transcripción...');
+  flushChunk(true);
+  cleanupCapture();
+  maybeFinishAfterDrain();
 }
 function finishRec(){
-  S.isRec=false;S.isPaused=false;
-  clearInterval(S.ti);
-  ['proc','src_node'].forEach(k=>{if(S[k]){try{S[k].disconnect();}catch(e){}S[k]=null;}});
-  if(S.actx&&S.actx.state!=='closed'){try{S.actx.close();}catch(e){}S.actx=null;}
-  if(S.stream){S.stream.getTracks().forEach(t=>t.stop());S.stream=null;}
-  if(S.ws&&S.ws.readyState<=1){try{S.ws.close();}catch(e){}S.ws=null;}
-  if(S.wl){try{S.wl.release();}catch(e){}S.wl=null;}
+  S.isRec=false;
+  S.isPaused=false;
+  S.pendingStop=false;
+  cleanupCapture();
   document.getElementById('recBtn').disabled=false;
   document.getElementById('recBtn').classList.remove('active');
   document.getElementById('pauseBtn').disabled=true;
   document.getElementById('pauseBtn').textContent='⏸';
   document.getElementById('stopBtn').disabled=true;
   document.getElementById('waveEl').style.display='none';
-  setPill('Listo','ok');setLabel('Grabación terminada ✓');
+  setPill('Listo','ok');
+  setLabel('Grabación terminada ✓');
   if(S.transcript.trim())document.getElementById('m-save').classList.add('on');
 }
 function updTimer(){
@@ -1164,15 +1290,15 @@ function fullCtx(){
 }
 async function callGemini(prompt){
   const r=await fetch(REST_URL(gk()),{method:'POST',headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({contents:[{parts:[{text:prompt}]}]})});
+    body:JSON.stringify({generationConfig:{temperature:0.4},contents:[{parts:[{text:prompt}]}]})});
   const d=await r.json();if(d.error)throw new Error(d.error.message);
-  return d.candidates[0].content.parts[0].text;
+  return extractTextFromResponse(d);
 }
 async function callParts(parts){
   const r=await fetch(REST_URL(gk()),{method:'POST',headers:{'Content-Type':'application/json'},
     body:JSON.stringify({contents:[{parts}]})});
   const d=await r.json();if(d.error)throw new Error(d.error.message);
-  return d.candidates[0].content.parts[0].text;
+  return extractTextFromResponse(d);
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -1436,7 +1562,12 @@ async function cloudSync(){
 // ═══════════════════════════════════════════════════════════════
 window.addEventListener('load',()=>{
   if(window.pdfjsLib)pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-  if(gk()){document.getElementById('keyBtn').textContent='✅';}
+  if(BUILTIN_API_KEY && !localStorage.getItem('claseai_key'))localStorage.setItem('claseai_key',BUILTIN_API_KEY);
+  if(gk()){
+    document.getElementById('keyBtn').textContent='✅';
+    document.getElementById('apiIn').value=gk();
+  }
+  resetRecState();
   // Demo data on first run
   if(!DB.folders().length){
     const f=DB.mkFolder('2026 – Semestre 1',COLORS[0]);
