@@ -1551,7 +1551,7 @@ function fullCtx(){
   return getCombinedTranscript()+extra;
 }
 async function callGemini(prompt,{onRetry}={}){
-  const d=await geminiJsonFetch(TEXT_REST_URL(),{generationConfig:{temperature:0.4},contents:[{parts:[{text:prompt}]}]},{retries:2,onRetry});
+  const d=await geminiJsonFetch(TEXT_REST_URL(),{generationConfig:{temperature:0.22},contents:[{parts:[{text:prompt}]}]},{retries:2,onRetry});
   return extractTextFromResponse(d);
 }
 async function callParts(parts,{onRetry}={}){
@@ -1562,18 +1562,143 @@ async function callParts(parts,{onRetry}={}){
 // ═══════════════════════════════════════════════════════════════
 //  TOOLS
 // ═══════════════════════════════════════════════════════════════
+const QUALITY_RULES=`
+Trabaja como un asistente académico de alta calidad, orientado a estudio serio.
+Usa solo la información realmente presente en la transcripción y fuentes del cuaderno.
+No inventes datos, fechas, definiciones ni conclusiones.
+Si algo es ambiguo o quedó incompleto en la grabación, dilo de forma breve.
+Prioriza: claridad, estructura, precisión conceptual y utilidad para estudiar.
+Corrige muletillas, repeticiones y desorden oral de clase, pero sin alterar el sentido.
+Convierte frases habladas en apuntes limpios y académicos.
+Evita relleno y frases vacías.
+Responde siempre en español claro, natural y útil para repasar.
+`;
+
 const P={
-  summary:c=>`Eres asistente académico. Genera **resumen ejecutivo** en español: tema principal, puntos clave, conclusión. Markdown.\n\n${c}`,
-  outline:c=>`Genera **esquema detallado** por temas/subtemas en español. Markdown jerárquico.\n\n${c}`,
-  questions:c=>`Genera **10 preguntas de repaso** con respuesta. Varía niveles. Markdown numerado.\n\n${c}`,
-  mindmap:c=>`Genera **mapa conceptual** con tema central, ramas y sub-conceptos usando → y sangría.\n\n${c}`,
-  presentation:c=>`Genera **presentación**: título, intro, 6 slides, conclusión. Por slide: título, 4 bullets, nota. Usa ---.\n\n${c}`,
-  report:c=>`Genera **informe académico formal**: resumen, intro, desarrollo, conclusiones.\n\n${c}`,
-  infographic:c=>`Genera contenido para **infografía**: título, 5 bloques con ícono, dato clave, frase.\n\n${c}`,
-  datatable:c=>`Extrae información en **tablas markdown**: conceptos, comparaciones, datos.\n\n${c}`,
-  cards:c=>`Genera 12 tarjetas. SOLO JSON:\n[{"q":"...","a":"..."}]\n\n${c}`,
-  quiz:c=>`Genera 8 preguntas opción múltiple. SOLO JSON:\n[{"question":"...","options":["a","b","c","d"],"correct":0,"explanation":"..."}]\n\n${c}`,
-  chat:(c,q)=>`Eres tutor académico. Alumno estudió:\n${c}\n\nResponde en español pedagógicamente.\nPREGUNTA: ${q}`
+  summary:c=>`${QUALITY_RULES}
+Genera un resumen de estudio estilo cuaderno inteligente.
+Formato markdown con este orden exacto:
+# Resumen
+## Tema central
+## Ideas clave
+- 6 a 10 viñetas sustantivas
+## Conceptos importantes
+- término: explicación breve
+## Conclusión académica
+## Vacíos o dudas detectadas
+- solo si realmente faltan datos
+
+No hagas un resumen genérico: sintetiza, ordena y limpia la clase.
+
+CONTENIDO:
+${c}`,
+  outline:c=>`${QUALITY_RULES}
+Convierte el contenido en un esquema de estudio de alta calidad.
+Formato markdown jerárquico:
+# Esquema
+I. Tema principal
+A. Subtema
+1. Idea
+a. detalle si aplica
+
+Agrupa por bloques temáticos reales, no por orden literal de la grabación.
+
+CONTENIDO:
+${c}`,
+  questions:c=>`${QUALITY_RULES}
+Genera 10 preguntas de repaso con respuesta breve y precisa.
+Incluye mezcla de memoria, comprensión, relación y aplicación.
+Formato markdown numerado:
+1. Pregunta
+   - Respuesta:
+   - Por qué importa:
+
+CONTENIDO:
+${c}`,
+  mindmap:c=>`${QUALITY_RULES}
+Genera un mapa mental textual útil para estudiar.
+Formato:
+TEMA CENTRAL
+→ Rama
+  → Subidea
+    → Detalle
+
+Usa ramas conceptuales reales, no frases largas.
+
+CONTENIDO:
+${c}`,
+  presentation:c=>`${QUALITY_RULES}
+Genera una presentación académica clara.
+Formato exacto:
+# Título general
+## Diapositiva 1: ...
+- 4 bullets
+- Nota del expositor: ...
+---
+Haz 6 diapositivas más cierre final.
+No repitas ideas entre slides.
+
+CONTENIDO:
+${c}`,
+  report:c=>`${QUALITY_RULES}
+Redacta un informe académico sólido y limpio.
+Formato markdown:
+# Título
+## Resumen ejecutivo
+## Desarrollo temático
+## Hallazgos o tesis centrales
+## Conclusiones
+## Puntos que requieren verificación
+- solo si aplica
+
+CONTENIDO:
+${c}`,
+  infographic:c=>`${QUALITY_RULES}
+Genera contenido para una infografía académica.
+Formato:
+# Título
+## Bloque 1
+- Ícono sugerido
+- Idea fuerza
+- Dato o explicación
+Haz 5 bloques, con frases cortas y contundentes.
+
+CONTENIDO:
+${c}`,
+  datatable:c=>`${QUALITY_RULES}
+Extrae una o más tablas markdown realmente útiles para estudiar.
+Prioriza comparaciones, conceptos, autores, procesos, causas, efectos o etapas según el contenido.
+No inventes columnas que no se sostengan en la fuente.
+
+CONTENIDO:
+${c}`,
+  cards:c=>`${QUALITY_RULES}
+Genera 12 tarjetas de estudio de alta calidad.
+Cada tarjeta debe preguntar algo importante y responder de forma breve, precisa y memorizable.
+SOLO JSON válido:
+[{"q":"...","a":"..."}]
+
+CONTENIDO:
+${c}`,
+  quiz:c=>`${QUALITY_RULES}
+Genera 8 preguntas tipo prueba de alta calidad.
+Cada una debe tener 4 opciones plausibles, una correcta y explicación breve.
+Evita opciones absurdas.
+SOLO JSON válido:
+[{"question":"...","options":["a","b","c","d"],"correct":0,"explanation":"..."}]
+
+CONTENIDO:
+${c}`,
+  chat:(c,q)=>`${QUALITY_RULES}
+Actúa como tutor académico riguroso.
+Responde usando solo lo estudiado en la transcripción y fuentes.
+Si la respuesta no está clara en el material, dilo.
+Primero responde directo. Luego añade una sección breve llamada "Para entenderlo mejor" solo si aporta valor.
+
+MATERIAL DE ESTUDIO:
+${c}
+
+PREGUNTA DEL ALUMNO: ${q}`
 };
 
 async function runTool(action){
