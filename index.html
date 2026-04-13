@@ -1160,6 +1160,7 @@ function renderTranscript(){
   box.scrollTop=999999;
 }
 function clearLiveTimer(){if(S.liveReadyTimer){clearTimeout(S.liveReadyTimer);S.liveReadyTimer=null;}}
+function clearFinalizingTimer(){if(S.finalizingTimeout){clearTimeout(S.finalizingTimeout);S.finalizingTimeout=null;}}
 function closeLiveWs(){
   clearLiveTimer();
   if(S.liveWs){
@@ -1182,6 +1183,7 @@ document.addEventListener('visibilitychange',()=>{
   else setLabel('Si bloqueas el iPhone, iOS puede cortar el micrófono. Mejor déjala abierta.');
 });
 function resetRecState(){
+  clearFinalizingTimer();
   S.transcript='';
   S.liveTurnText='';
   S.secs=0;
@@ -1492,11 +1494,23 @@ function stopRec(){
   S.transcript=getCombinedTranscript();
   setPill('Procesando','warn');
   setLabel(S.deferGeminiTranscription?'Transcribiendo audio final...':'Finalizando transcripción...');
+  clearFinalizingTimer();
+  S.finalizingTimeout=setTimeout(()=>{
+    if(S.pendingStop){
+      const t=(getTranscriptText()||'').trim();
+      if(!t){
+        S.transcript='[Audio grabado. No se obtuvo transcripción automática. Puedes guardar la sesión igual y volver a intentar con Resumen/Preguntas después.]';
+        renderTranscript();
+      }
+      finishRec();
+    }
+  },15000);
   flushChunk(true);
   cleanupCapture();
   maybeFinishAfterDrain();
 }
 function finishRec(){
+  clearFinalizingTimer();
   S.isRec=false;
   S.isPaused=false;
   S.pendingStop=false;
@@ -1507,10 +1521,12 @@ function finishRec(){
   document.getElementById('pauseBtn').textContent='⏸';
   document.getElementById('stopBtn').disabled=true;
   document.getElementById('waveEl').style.display='none';
-  S.transcript=getCombinedTranscript();
+  S.transcript=getCombinedTranscript() || S.transcript || '[Sesión grabada sin transcripción visible]';
+  renderTranscript();
   setPill('Listo','ok');
   setLabel('Grabación terminada ✓');
-  if(getTranscriptText().trim())document.getElementById('m-save').classList.add('on');
+  document.getElementById('sessTitle').value='Clase '+new Date().toLocaleDateString('es',{day:'numeric',month:'short'});
+  document.getElementById('m-save').classList.add('on');
 }
 function updTimer(){
   const h=Math.floor(S.secs/3600),m=Math.floor((S.secs%3600)/60),s=S.secs%60;
@@ -1519,8 +1535,8 @@ function updTimer(){
 function saveSess(useTitle){
   const title=useTitle?document.getElementById('sessTitle').value.trim()||'Clase sin título':'Clase '+new Date().toLocaleDateString('es',{day:'numeric',month:'short'});
   document.getElementById('m-save').classList.remove('on');
-  const transcriptText=getTranscriptText();
-  if(!transcriptText.trim())return;
+  let transcriptText=getTranscriptText();
+  if(!transcriptText.trim())transcriptText='[Sesión guardada sin transcripción automática]';
   const sess=DB.mkSess(S.nbId,title,transcriptText);
   S.sessId=sess.id;goSess(sess.id);
 }
