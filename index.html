@@ -1,0 +1,1453 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="Clase AI"/>
+<meta name="theme-color" content="#0a0b14"/>
+<title>Clase AI</title>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<style>
+:root{
+  --bg:#0a0b14;--s1:#10121e;--s2:#181b28;--s3:#20243a;
+  --accent:#7c6fff;--a2:#a78bfa;--a3:#c4b5fd;
+  --green:#22c55e;--red:#ef4444;--yellow:#eab308;--cyan:#06b6d4;
+  --text:#e8eaf6;--muted:#6b7280;--border:#252840;
+  --sat:env(safe-area-inset-top,0px);--sab:env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',system-ui,sans-serif;}
+.app{display:flex;flex-direction:column;height:100dvh;}
+
+/* ═══ TOPBAR ═══ */
+.topbar{
+  background:rgba(16,18,30,.92);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
+  padding:calc(var(--sat) + 10px) 14px 10px;
+  display:flex;align-items:center;gap:10px;flex-shrink:0;min-height:52px;
+}
+.topbar-logo{font-size:18px;font-weight:900;white-space:nowrap;
+  background:linear-gradient(90deg,#a78bfa,#7c6fff);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.topbar-bc{flex:1;display:flex;align-items:center;gap:5px;overflow:hidden;}
+.bc{font-size:13px;font-weight:700;color:var(--muted);cursor:pointer;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.bc.cur{color:var(--text);}
+.bc:hover{color:var(--a2);}
+.bc-sep{color:var(--border);font-size:11px;flex-shrink:0;}
+.topbar-right{display:flex;align-items:center;gap:6px;flex-shrink:0;}
+.t-btn{width:32px;height:32px;border-radius:10px;border:1px solid var(--border);
+  background:var(--s2);display:flex;align-items:center;justify-content:center;
+  font-size:15px;cursor:pointer;flex-shrink:0;}
+.t-btn:active{background:var(--s3);}
+.status-pill{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;
+  border-radius:20px;font-size:10px;font-weight:700;
+  background:var(--s2);border:1px solid var(--border);color:var(--muted);}
+.status-pill .dot{width:5px;height:5px;border-radius:50%;background:currentColor;flex-shrink:0;}
+.status-pill.rec{background:rgba(239,68,68,.1);color:var(--red);border-color:rgba(239,68,68,.4);}
+.status-pill.rec .dot{animation:blink 1s infinite;}
+.status-pill.ok{background:rgba(34,197,94,.1);color:var(--green);border-color:rgba(34,197,94,.4);}
+.status-pill.warn{background:rgba(234,179,8,.1);color:var(--yellow);border-color:rgba(234,179,8,.4);}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+
+/* ═══ CONTENT ═══ */
+.content{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;
+  padding:16px 14px;scroll-behavior:smooth;}
+.content::-webkit-scrollbar{display:none;}
+
+/* ═══ BOTTOM NAV ═══ */
+.bnav{background:rgba(16,18,30,.95);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border-top:1px solid var(--border);
+  padding:6px 0 calc(var(--sab) + 6px);
+  display:flex;align-items:center;justify-content:space-around;flex-shrink:0;}
+.bnav-item{display:flex;flex-direction:column;align-items:center;gap:2px;
+  cursor:pointer;padding:4px 10px;border-radius:10px;
+  font-size:9px;font-weight:700;letter-spacing:.02em;color:var(--muted);min-width:48px;}
+.bnav-item .bi{font-size:20px;line-height:1.2;}
+.bnav-item.on{color:var(--a2);}
+.bnav-item:active{background:var(--s2);}
+
+/* ═══ VIEWS ═══ */
+.view{display:none;flex-direction:column;gap:14px;}
+.view.on{display:flex;}
+
+/* ══════════════════════════════════════════
+   LIBRARY  (NotebookLM + Thea style)
+══════════════════════════════════════════ */
+.lib-toprow{display:flex;align-items:center;gap:8px;margin-bottom:14px;}
+.lib-search-wrap{flex:1;position:relative;}
+.lib-search-wrap::before{content:"🔍";position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:13px;pointer-events:none;}
+.lib-search{width:100%;background:var(--s2);border:1px solid var(--border);border-radius:22px;
+  color:var(--text);padding:9px 14px 9px 34px;font-size:14px;outline:none;
+  transition:border-color .2s;}
+.lib-search:focus{border-color:var(--accent);}
+.lib-new-btn{white-space:nowrap;padding:9px 14px;border-radius:22px;border:none;
+  background:linear-gradient(135deg,var(--accent),var(--a2));color:#fff;
+  font-size:12px;font-weight:800;cursor:pointer;flex-shrink:0;}
+.lib-new-btn:active{opacity:.85;}
+.sec-label{font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;
+  letter-spacing:.07em;margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+.sec-label::after{content:'';flex:1;height:1px;background:var(--border);}
+
+/* Notebook cards grid */
+.nb-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:20px;}
+@media(min-width:520px){.nb-grid{grid-template-columns:repeat(3,1fr);}}
+
+/* Big colorful card */
+.nb-card{border-radius:18px;cursor:pointer;aspect-ratio:1.2/1;
+  position:relative;overflow:hidden;
+  transition:transform .15s,box-shadow .15s;}
+.nb-card:active{transform:scale(.95);}
+.nb-card-bg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;}
+.nb-card-watermark{font-size:64px;opacity:.18;transform:rotate(-10deg) scale(1.1);line-height:1;}
+.nb-card-overlay{position:absolute;inset:0;
+  background:linear-gradient(180deg,transparent 20%,rgba(0,0,0,.65) 100%);}
+.nb-card-body{position:absolute;bottom:0;left:0;right:0;padding:11px 12px;}
+.nb-card-name{font-size:13px;font-weight:800;color:#fff;
+  text-shadow:0 1px 4px rgba(0,0,0,.6);line-height:1.3;margin-bottom:2px;}
+.nb-card-meta{font-size:10px;color:rgba(255,255,255,.65);}
+.nb-card-dot{position:absolute;top:10px;right:10px;width:28px;height:28px;
+  border-radius:50%;background:rgba(0,0,0,.35);backdrop-filter:blur(4px);
+  display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer;z-index:2;}
+
+/* Add card */
+.nb-add-card{border-radius:18px;aspect-ratio:1.2/1;
+  border:2px dashed var(--border);background:transparent;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:6px;cursor:pointer;color:var(--muted);font-size:12px;font-weight:700;
+  transition:border-color .2s,color .2s;}
+.nb-add-card:active{border-color:var(--accent);color:var(--accent);}
+.nb-add-card-icon{font-size:22px;}
+
+/* Folder section header */
+.folder-sec{margin-bottom:22px;}
+.folder-sec-head{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+.folder-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.folder-title{font-size:15px;font-weight:800;flex:1;}
+.folder-info{font-size:11px;color:var(--muted);}
+.folder-btns{display:flex;gap:5px;}
+.f-btn{padding:4px 10px;border-radius:10px;border:1px solid var(--border);
+  background:var(--s2);font-size:11px;font-weight:700;color:var(--muted);cursor:pointer;}
+.f-btn:active{border-color:var(--accent);color:var(--accent);}
+
+.new-folder-row{display:flex;align-items:center;gap:8px;padding:12px 14px;
+  border:1px dashed var(--border);border-radius:14px;color:var(--muted);
+  cursor:pointer;font-size:13px;font-weight:700;justify-content:center;
+  margin-top:4px;}
+.new-folder-row:active{border-color:var(--accent);color:var(--accent);}
+.empty-lib{text-align:center;padding:60px 20px;color:var(--muted);line-height:2.2;font-size:13px;}
+.empty-lib span{font-size:48px;display:block;margin-bottom:8px;}
+.sync-banner{border-radius:12px;padding:10px 14px;font-size:12px;margin-bottom:10px;
+  font-weight:600;display:none;}
+
+/* ══════════════════════════════════════════
+   NOTEBOOK VIEW
+══════════════════════════════════════════ */
+.nb-hero{
+  background:var(--s1);border:1px solid var(--border);border-radius:20px;
+  padding:18px 16px;display:flex;align-items:center;gap:14px;margin-bottom:4px;}
+.nb-hero-ava{width:56px;height:56px;border-radius:16px;
+  display:flex;align-items:center;justify-content:center;font-size:32px;flex-shrink:0;}
+.nb-hero-info{flex:1;min-width:0;}
+.nb-hero-name{font-size:19px;font-weight:900;line-height:1.2;}
+.nb-hero-folder{font-size:12px;color:var(--muted);margin-top:3px;display:flex;align-items:center;gap:4px;}
+.nb-hero-edit{font-size:18px;cursor:pointer;padding:4px;}
+
+.tab-row{display:flex;gap:2px;border-bottom:1px solid var(--border);margin-bottom:14px;}
+.tab{padding:9px 16px;font-size:13px;font-weight:700;color:var(--muted);cursor:pointer;
+  border-bottom:2px solid transparent;margin-bottom:-1px;border-radius:8px 8px 0 0;
+  transition:color .15s;}
+.tab.on{color:var(--a2);border-bottom-color:var(--a2);}
+.tab:active{color:var(--a3);}
+
+.rec-big-btn{
+  background:linear-gradient(135deg,var(--accent) 0%,var(--a2) 100%);
+  border-radius:16px;padding:16px 18px;cursor:pointer;
+  display:flex;align-items:center;gap:14px;margin-bottom:4px;
+  transition:opacity .15s;}
+.rec-big-btn:active{opacity:.85;}
+.rbb-icon{font-size:26px;}
+.rbb-texts{}
+.rbb-title{font-size:14px;font-weight:800;color:#fff;}
+.rbb-sub{font-size:11px;color:rgba(255,255,255,.75);margin-top:2px;}
+
+.date-sep{font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;
+  letter-spacing:.05em;padding:10px 0 5px;display:flex;align-items:center;gap:8px;}
+.date-sep::after{content:'';flex:1;height:1px;background:var(--border);}
+
+.sess-card{
+  background:var(--s1);border:1px solid var(--border);border-radius:14px;
+  padding:13px 14px;display:flex;align-items:center;gap:12px;
+  cursor:pointer;margin-bottom:7px;transition:border-color .15s;}
+.sess-card:active{border-color:var(--accent);}
+.sess-icon{width:36px;height:36px;border-radius:10px;background:rgba(124,111,255,.15);
+  display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.sess-info{flex:1;min-width:0;}
+.sess-title{font-size:13px;font-weight:800;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.sess-meta{font-size:11px;color:var(--muted);margin-top:2px;}
+.sess-arrow{color:var(--border);font-size:14px;}
+
+/* Sources */
+.src-add-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;}
+.src-add-btn{background:var(--s2);border:1px solid var(--border);border-radius:13px;
+  padding:13px 8px;display:flex;flex-direction:column;align-items:center;gap:6px;
+  cursor:pointer;font-size:11px;font-weight:700;text-align:center;}
+.src-add-btn .sai{font-size:22px;}
+.src-add-btn:active{border-color:var(--accent);color:var(--a2);}
+.src-item{background:var(--s2);border:1px solid var(--border);border-radius:12px;
+  padding:11px 13px;display:flex;align-items:center;gap:10px;margin-bottom:7px;}
+.src-item-icon{width:34px;height:34px;border-radius:9px;
+  display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;}
+.src-item-info{flex:1;min-width:0;}
+.src-item-name{font-size:13px;font-weight:700;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.src-item-meta{font-size:10px;color:var(--muted);margin-top:1px;}
+.src-del{color:var(--red);font-size:16px;cursor:pointer;padding:4px;flex-shrink:0;}
+.empty-nb{text-align:center;padding:40px 20px;color:var(--muted);font-size:13px;line-height:1.9;}
+
+/* ══════════════════════════════════════════
+   RECORD VIEW
+══════════════════════════════════════════ */
+.rec-hero{display:flex;flex-direction:column;align-items:center;gap:16px;padding:10px 0 14px;}
+.rec-timer{font-size:48px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-1px;}
+.rec-status-row{display:flex;align-items:center;gap:10px;height:24px;}
+.wave{display:flex;gap:3px;align-items:center;}
+.wave span{width:3px;background:var(--a2);border-radius:2px;animation:wav 1s ease-in-out infinite;}
+.wave span:nth-child(2){animation-delay:.15s}.wave span:nth-child(3){animation-delay:.3s}
+.wave span:nth-child(4){animation-delay:.45s}.wave span:nth-child(5){animation-delay:.6s}
+@keyframes wav{0%,100%{height:4px}50%{height:20px}}
+.sess-pill{background:var(--s2);border:1px solid var(--border);border-radius:20px;
+  padding:3px 12px;font-size:11px;font-weight:700;color:var(--muted);}
+.rec-main-btn{width:88px;height:88px;border-radius:50%;border:none;cursor:pointer;
+  background:linear-gradient(135deg,var(--accent),var(--a2));
+  display:flex;align-items:center;justify-content:center;font-size:32px;
+  box-shadow:0 0 0 0 rgba(124,111,255,.5);transition:transform .15s;}
+.rec-main-btn.active{animation:pring 1.5s ease-out infinite;}
+.rec-main-btn:active{transform:scale(.91);}
+@keyframes pring{0%{box-shadow:0 0 0 0 rgba(124,111,255,.6);}70%{box-shadow:0 0 0 22px rgba(124,111,255,0);}100%{box-shadow:0 0 0 0 rgba(124,111,255,0);}}
+.rec-ctrl{display:flex;gap:12px;align-items:center;}
+.ctrl-btn{width:48px;height:48px;border-radius:50%;border:1px solid var(--border);
+  background:var(--s2);font-size:17px;display:flex;align-items:center;
+  justify-content:center;cursor:pointer;}
+.ctrl-btn.stop{background:var(--red);border-color:var(--red);}
+.ctrl-btn:active{background:var(--s3);}
+.ctrl-btn:disabled{opacity:.3;pointer-events:none;}
+.rec-label{font-size:12px;color:var(--muted);text-align:center;min-height:16px;}
+.live-box{background:var(--s1);border:1px solid var(--border);border-radius:14px;
+  min-height:160px;max-height:280px;overflow-y:auto;padding:14px;
+  font-size:14px;line-height:1.8;-webkit-overflow-scrolling:touch;}
+.live-box::-webkit-scrollbar{display:none;}
+.ph{color:var(--muted);font-style:italic;font-size:13px;}
+
+/* ══════════════════════════════════════════
+   SESSION VIEW
+══════════════════════════════════════════ */
+.tools-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
+.tool-btn{background:var(--s1);border:1px solid var(--border);border-radius:14px;
+  padding:15px 10px;display:flex;flex-direction:column;align-items:center;gap:7px;
+  cursor:pointer;font-size:12px;font-weight:700;min-height:74px;
+  transition:border-color .15s,background .15s;}
+.tool-btn .ti{font-size:24px;}
+.tool-btn:active{background:var(--s2);border-color:var(--accent);}
+.tool-btn.on{border-color:var(--accent);background:rgba(124,111,255,.1);color:var(--a2);}
+.result-box{background:var(--s1);border:1px solid var(--border);border-radius:14px;
+  padding:16px;font-size:14px;line-height:1.8;display:none;}
+.result-box.on{display:block;}
+.result-box h1,.result-box h2,.result-box h3{color:var(--a2);margin:12px 0 5px;font-size:15px;}
+.result-box ul,.result-box ol{padding-left:20px;margin-bottom:8px;}
+.result-box li{margin-bottom:4px;}
+.result-box strong{color:var(--a3);}
+.result-box p{margin-bottom:8px;}
+.result-box hr{border:none;border-top:1px solid var(--border);margin:12px 0;}
+.result-box table{width:100%;border-collapse:collapse;font-size:13px;margin:8px 0;}
+.result-box th{background:var(--s2);padding:7px 8px;color:var(--a2);text-align:left;font-size:12px;}
+.result-box td{padding:6px 8px;border-bottom:1px solid var(--border);}
+
+/* Flashcards */
+.fc-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.fc{perspective:700px;height:120px;cursor:pointer;}
+.fc-inner{position:relative;width:100%;height:100%;
+  transition:transform .45s cubic-bezier(.4,0,.2,1);transform-style:preserve-3d;}
+.fc.flip .fc-inner{transform:rotateY(180deg);}
+.fc-f,.fc-b{position:absolute;width:100%;height:100%;backface-visibility:hidden;
+  border-radius:16px;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;padding:12px;font-size:12px;text-align:center;line-height:1.4;gap:4px;}
+.fc-f{background:var(--s1);border:1px solid var(--border);}
+.fc-b{transform:rotateY(180deg);background:rgba(124,111,255,.12);
+  border:1px solid rgba(124,111,255,.4);color:var(--a2);}
+.fc-lbl{font-size:9px;font-weight:800;text-transform:uppercase;opacity:.4;letter-spacing:.05em;}
+
+/* Quiz */
+.quiz-card{background:var(--s1);border:1px solid var(--border);border-radius:14px;
+  padding:14px;margin-bottom:10px;}
+.quiz-num{font-size:10px;font-weight:800;color:var(--a2);margin-bottom:5px;text-transform:uppercase;}
+.quiz-q{font-size:13px;font-weight:800;line-height:1.5;margin-bottom:10px;}
+.quiz-opts{display:flex;flex-direction:column;gap:7px;}
+.quiz-opt{padding:10px 13px;border-radius:10px;border:1px solid var(--border);
+  background:var(--s2);font-size:12px;text-align:left;cursor:pointer;
+  color:var(--text);width:100%;transition:border-color .15s,background .15s;}
+.quiz-opt:active:not(.done){background:var(--s3);}
+.quiz-opt.right{background:rgba(34,197,94,.1);border-color:var(--green);color:var(--green);}
+.quiz-opt.wrong{background:rgba(239,68,68,.1);border-color:var(--red);color:var(--red);}
+.quiz-exp{margin-top:8px;font-size:11px;color:var(--muted);padding:8px;
+  background:var(--s2);border-radius:9px;display:none;line-height:1.6;}
+.score-banner{text-align:center;padding:18px;font-size:20px;font-weight:900;color:var(--a2);}
+
+/* Chat */
+.chat-wrap{display:flex;flex-direction:column;gap:9px;
+  min-height:200px;max-height:380px;overflow-y:auto;
+  -webkit-overflow-scrolling:touch;margin-bottom:10px;}
+.chat-wrap::-webkit-scrollbar{display:none;}
+.msg{padding:10px 14px;border-radius:14px;font-size:13px;line-height:1.65;max-width:92%;}
+.msg.me{background:rgba(124,111,255,.18);border:1px solid rgba(124,111,255,.3);align-self:flex-end;}
+.msg.ai{background:var(--s1);border:1px solid var(--border);align-self:flex-start;}
+.msg.ai strong{color:var(--a3);}.msg.ai ul{padding-left:16px;}
+.chat-in{display:flex;gap:8px;}
+.chat-in input{flex:1;background:var(--s1);border:1px solid var(--border);border-radius:22px;
+  color:var(--text);padding:11px 16px;font-size:14px;outline:none;}
+.chat-in input:focus{border-color:var(--accent);}
+.chat-send{padding:11px 16px;border-radius:22px;border:none;
+  background:var(--accent);color:#fff;font-size:14px;font-weight:700;cursor:pointer;flex-shrink:0;}
+
+/* Export */
+.exp-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.exp-card{background:var(--s1);border:1px solid var(--border);border-radius:14px;
+  padding:16px 12px;display:flex;flex-direction:column;align-items:center;
+  gap:7px;cursor:pointer;text-align:center;transition:border-color .15s;}
+.exp-card:active{border-color:var(--accent);background:rgba(124,111,255,.07);}
+.exp-icon{font-size:28px;}
+.exp-title{font-size:12px;font-weight:800;}
+.exp-sub{font-size:10px;color:var(--muted);}
+
+/* ══════════════════════════════════════════
+   MISC
+══════════════════════════════════════════ */
+.loading{display:flex;align-items:center;gap:9px;color:var(--muted);padding:12px 0;font-size:13px;}
+.spin{width:16px;height:16px;border:2px solid var(--border);border-top-color:var(--accent);
+  border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.btn{padding:11px 18px;border-radius:12px;border:none;font-size:13px;font-weight:700;cursor:pointer;}
+.btn-p{background:var(--accent);color:#fff;}.btn-p:active{background:#6a5ee0;}
+.btn-g{background:var(--s2);color:var(--text);border:1px solid var(--border);}
+.btn-g:active{background:var(--s3);}
+.btn-r{background:var(--red);color:#fff;}
+.w100{width:100%;}
+.row{display:flex;gap:8px;}
+
+/* ══════════════════════════════════════════
+   MODALS
+══════════════════════════════════════════ */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.8);
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  display:none;align-items:flex-end;justify-content:center;z-index:200;}
+.overlay.on{display:flex;}
+.modal{background:var(--s1);border:1px solid var(--border);
+  border-radius:24px 24px 0 0;padding:22px 18px calc(var(--sab)+24px);
+  width:100%;max-width:500px;max-height:90dvh;overflow-y:auto;}
+.modal::-webkit-scrollbar{display:none;}
+.modal-title{font-size:17px;font-weight:900;margin-bottom:16px;}
+.ml{font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;
+  letter-spacing:.06em;margin-bottom:6px;margin-top:12px;}
+.mi{width:100%;background:var(--s2);border:1px solid var(--border);border-radius:11px;
+  color:var(--text);padding:11px 14px;font-size:14px;outline:none;margin-bottom:4px;}
+.mi:focus{border-color:var(--accent);}
+textarea.mi{resize:vertical;min-height:80px;font-family:inherit;}
+select.mi option{background:var(--s2);}
+.hint{font-size:11px;color:var(--muted);margin-bottom:12px;line-height:1.7;}
+.hint a{color:var(--accent);}
+.color-row{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:10px;}
+.cswatch{width:28px;height:28px;border-radius:50%;cursor:pointer;
+  border:2px solid transparent;transition:border-color .15s;}
+.cswatch.on{border-color:#fff;}
+.icon-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:10px;}
+.iopt{width:36px;height:36px;border-radius:9px;background:var(--s2);
+  border:1px solid var(--border);display:flex;align-items:center;justify-content:center;
+  font-size:18px;cursor:pointer;}
+.iopt.on{border-color:var(--accent);background:rgba(124,111,255,.15);}
+.src-type-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;}
+.stc{background:var(--s2);border:1px solid var(--border);border-radius:12px;
+  padding:13px 8px;display:flex;flex-direction:column;align-items:center;gap:6px;
+  cursor:pointer;font-size:11px;font-weight:700;text-align:center;}
+.stc.on{border-color:var(--accent);background:rgba(124,111,255,.1);color:var(--a2);}
+.stc .si{font-size:22px;}
+</style>
+</head><body>
+<div class="app">
+
+<!-- ═══ TOPBAR ═══ -->
+<div class="topbar">
+  <div class="topbar-bc" id="bc">
+    <span class="bc cur">🎓 Clase AI</span>
+  </div>
+  <div class="topbar-right">
+    <div class="status-pill" id="spill"><span class="dot"></span><span id="spillTxt">Listo</span></div>
+    <div class="t-btn" id="keyBtn" onclick="om('key')">🔑</div>
+  </div>
+</div>
+
+<!-- ═══ CONTENT ═══ -->
+<div class="content" id="content">
+
+  <!-- ██ LIBRARY ██ -->
+  <div class="view on" id="v-lib">
+    <div class="lib-toprow">
+      <div class="lib-search-wrap">
+        <input class="lib-search" id="libSearch" placeholder="Buscar cuadernos..." oninput="filterLib(this.value)"/>
+      </div>
+      <div class="t-btn" onclick="restoreBackup()" title="Importar backup">📥</div>
+      <div class="t-btn" onclick="om('sync')" title="Sync nube">☁️</div>
+      <button class="lib-new-btn" onclick="om('folder')">＋ Carpeta</button>
+    </div>
+    <div class="sync-banner" id="syncBanner"></div>
+    <div id="recSection" style="display:none">
+      <div class="sec-label">🕐 Recientes</div>
+      <div class="nb-grid" id="recGrid"></div>
+    </div>
+    <div id="foldersEl"></div>
+    <div class="new-folder-row" onclick="om('folder')">📁 Nueva carpeta · semestre / año</div>
+  </div>
+
+  <!-- ██ NOTEBOOK ██ -->
+  <div class="view" id="v-nb">
+    <div class="nb-hero">
+      <div class="nb-hero-ava" id="nbAva">📓</div>
+      <div class="nb-hero-info">
+        <div class="nb-hero-name" id="nbName">Cuaderno</div>
+        <div class="nb-hero-folder" id="nbFolder">📁 Carpeta</div>
+      </div>
+      <div class="nb-hero-edit" onclick="om('eNb')">✏️</div>
+    </div>
+    <div class="tab-row">
+      <div class="tab on" id="nbt-s" onclick="nbtab('s')">📋 Sesiones</div>
+      <div class="tab" id="nbt-f" onclick="nbtab('f')">📎 Fuentes</div>
+    </div>
+    <div id="nb-s-panel">
+      <div class="rec-big-btn" onclick="goRec()">
+        <span class="rbb-icon">🎙️</span>
+        <div class="rbb-texts">
+          <div class="rbb-title">Grabar nueva clase</div>
+          <div class="rbb-sub">Transcripción en tiempo real · hasta 2h</div>
+        </div>
+      </div>
+      <div id="sessList"></div>
+    </div>
+    <div id="nb-f-panel" style="display:none">
+      <div class="src-add-grid">
+        <div class="src-add-btn" onclick="om('src');setST('file')"><span class="sai">📄</span>Archivo</div>
+        <div class="src-add-btn" onclick="om('src');setST('image')"><span class="sai">🖼️</span>Imagen</div>
+        <div class="src-add-btn" onclick="om('src');setST('audio')"><span class="sai">🎵</span>Audio</div>
+        <div class="src-add-btn" onclick="om('src');setST('youtube')"><span class="sai">▶️</span>YouTube</div>
+        <div class="src-add-btn" onclick="om('src');setST('text')"><span class="sai">✏️</span>Texto</div>
+        <div class="src-add-btn" onclick="om('src');setST('url')"><span class="sai">🔗</span>URL web</div>
+      </div>
+      <div id="srcList"></div>
+    </div>
+  </div>
+
+  <!-- ██ RECORD ██ -->
+  <div class="view" id="v-rec">
+    <div class="rec-hero">
+      <div class="rec-timer" id="recTimer">00:00</div>
+      <div class="rec-status-row">
+        <div class="wave" id="waveEl" style="display:none"><span></span><span></span><span></span><span></span><span></span></div>
+        <div class="sess-pill" id="sessPill">máx 2h</div>
+      </div>
+      <button class="rec-main-btn" id="recBtn" onclick="startRec()">🎙️</button>
+      <div class="rec-ctrl">
+        <button class="ctrl-btn" id="pauseBtn" onclick="pauseRec()" disabled>⏸</button>
+        <button class="ctrl-btn stop" id="stopBtn" onclick="stopRec()" disabled>⏹</button>
+      </div>
+      <div class="rec-label" id="recLabel">Presiona para grabar</div>
+    </div>
+    <div class="sec-label" style="padding-bottom:8px">Transcripción en vivo</div>
+    <div class="live-box" id="liveBox"><span class="ph">La transcripción aparece aquí...</span></div>
+  </div>
+
+  <!-- ██ SESSION ██ -->
+  <div class="view" id="v-sess">
+    <div class="tab-row" id="sessTabs">
+      <div class="tab on" id="st-tools" onclick="stab('tools')">✨</div>
+      <div class="tab" id="st-cards" onclick="stab('cards')">🃏</div>
+      <div class="tab" id="st-quiz" onclick="stab('quiz')">📝</div>
+      <div class="tab" id="st-chat" onclick="stab('chat')">💬</div>
+      <div class="tab" id="st-export" onclick="stab('export')">💾</div>
+    </div>
+
+    <!-- GENERAR -->
+    <div id="sp-tools">
+      <div class="tools-grid">
+        <div class="tool-btn" id="tb-summary"      onclick="runTool('summary')"><span class="ti">📝</span>Resumen</div>
+        <div class="tool-btn" id="tb-outline"      onclick="runTool('outline')"><span class="ti">🗂️</span>Esquema</div>
+        <div class="tool-btn" id="tb-questions"    onclick="runTool('questions')"><span class="ti">❓</span>Preguntas</div>
+        <div class="tool-btn" id="tb-mindmap"      onclick="runTool('mindmap')"><span class="ti">🧠</span>Mapa mental</div>
+        <div class="tool-btn" id="tb-presentation" onclick="runTool('presentation')"><span class="ti">📊</span>Presentación</div>
+        <div class="tool-btn" id="tb-report"       onclick="runTool('report')"><span class="ti">📋</span>Informe</div>
+        <div class="tool-btn" id="tb-infographic"  onclick="runTool('infographic')"><span class="ti">📈</span>Infografía</div>
+        <div class="tool-btn" id="tb-datatable"    onclick="runTool('datatable')"><span class="ti">📊</span>Tabla</div>
+      </div>
+      <div class="result-box" id="resultBox"></div>
+    </div>
+    <!-- TARJETAS -->
+    <div id="sp-cards" style="display:none">
+      <button class="btn btn-p w100" onclick="loadCards()" style="margin-bottom:10px">🃏 Generar tarjetas</button>
+      <div style="font-size:11px;color:var(--muted);text-align:center;margin-bottom:10px">Toca para voltear</div>
+      <div class="fc-grid" id="fcGrid"></div>
+    </div>
+    <!-- PRUEBA -->
+    <div id="sp-quiz" style="display:none">
+      <button class="btn btn-p w100" onclick="loadQuiz()" style="margin-bottom:10px">📝 Generar prueba</button>
+      <div id="quizScore" style="display:none"></div>
+      <div id="quizContainer"></div>
+    </div>
+    <!-- CHAT -->
+    <div id="sp-chat" style="display:none">
+      <div style="font-size:11px;color:var(--muted);margin-bottom:8px">Tutor IA · pregunta sobre la clase y las fuentes</div>
+      <div class="chat-wrap" id="chatWrap"><div class="msg ai">¡Hola! Soy tu tutor. ¿Qué quieres repasar?</div></div>
+      <div class="chat-in">
+        <input type="text" id="chatIn" placeholder="Escribe tu pregunta..." onkeydown="if(event.key==='Enter')sendChat()"/>
+        <button class="chat-send" onclick="sendChat()">➤</button>
+      </div>
+    </div>
+    <!-- EXPORTAR -->
+    <div id="sp-export" style="display:none">
+      <div class="sec-label" style="margin-bottom:10px">Transcripción</div>
+      <div class="exp-grid" style="margin-bottom:14px">
+        <div class="exp-card" onclick="xport('transcript','txt')"><span class="exp-icon">📄</span><span class="exp-title">TXT</span><span class="exp-sub">Texto plano</span></div>
+        <div class="exp-card" onclick="xport('transcript','word')"><span class="exp-icon">🔵</span><span class="exp-title">Word .doc</span><span class="exp-sub">Microsoft Word</span></div>
+      </div>
+      <div class="sec-label" style="margin-bottom:10px">Resultado generado</div>
+      <div class="exp-grid" style="margin-bottom:14px">
+        <div class="exp-card" onclick="xport('result','txt')"><span class="exp-icon">📝</span><span class="exp-title">TXT</span><span class="exp-sub">Texto plano</span></div>
+        <div class="exp-card" onclick="xport('result','word')"><span class="exp-icon">🔵</span><span class="exp-title">Word .doc</span><span class="exp-sub">Formateado</span></div>
+      </div>
+      <div class="sec-label" style="margin-bottom:10px">Todo completo</div>
+      <div class="exp-grid">
+        <div class="exp-card" onclick="xport('all','txt')"><span class="exp-icon">📦</span><span class="exp-title">TXT completo</span><span class="exp-sub">Todo en uno</span></div>
+        <div class="exp-card" onclick="xport('all','word')"><span class="exp-icon">💼</span><span class="exp-title">Word completo</span><span class="exp-sub">Con formato</span></div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /content -->
+
+<!-- ═══ BOTTOM NAV (solo en sesión) ═══ -->
+<nav class="bnav" id="bnav" style="display:none">
+  <div class="bnav-item on" id="bn-tools" onclick="stab('tools')"><span class="bi">✨</span>Generar</div>
+  <div class="bnav-item"    id="bn-cards" onclick="stab('cards')"><span class="bi">🃏</span>Tarjetas</div>
+  <div class="bnav-item"    id="bn-quiz"  onclick="stab('quiz')"> <span class="bi">📝</span>Prueba</div>
+  <div class="bnav-item"    id="bn-chat"  onclick="stab('chat')"> <span class="bi">💬</span>Tutor</div>
+  <div class="bnav-item"    id="bn-export" onclick="stab('export')"><span class="bi">💾</span>Exportar</div>
+</nav>
+</div><!-- /app -->
+
+<!-- ═══════════ MODALS ═══════════ -->
+
+<!-- API KEY -->
+<div class="overlay" id="m-key" onclick="if(event.target===this)cm('key')">
+  <div class="modal">
+    <div class="modal-title">🔑 API Key de Gemini</div>
+    <input type="password" class="mi" id="apiIn" placeholder="Pega tu API key aquí"/>
+    <div class="hint">Obtén tu key gratis en <a href="https://aistudio.google.com/apikey" target="_blank">aistudio.google.com/apikey</a><br/>Se guarda solo en tu dispositivo.</div>
+    <div class="row"><button class="btn btn-g" onclick="cm('key')" style="flex:1">Cancelar</button><button class="btn btn-p" onclick="saveKey()" style="flex:2">Guardar</button></div>
+  </div>
+</div>
+
+<!-- SYNC / FIREBASE -->
+<div class="overlay" id="m-sync" onclick="if(event.target===this)cm('sync')">
+  <div class="modal">
+    <div class="modal-title">☁️ Sincronización entre dispositivos</div>
+    <div class="ml">Código de sincronización</div>
+    <input type="text" class="mi" id="syncCode" placeholder="Ej: kevin-clases-2026"/>
+    <div class="hint">
+      Usa el mismo código en tu iPhone y PC para compartir todos tus cuadernos automáticamente.<br/>
+      Requiere una config de Firebase gratuita. <a href="https://console.firebase.google.com" target="_blank">Crear proyecto Firebase →</a>
+    </div>
+    <div class="ml">Firebase Config (pega el objeto JSON)</div>
+    <textarea class="mi" id="fbConfig" placeholder='{"apiKey":"...","authDomain":"...","projectId":"..."}'></textarea>
+    <div class="row" style="margin-top:10px">
+      <button class="btn btn-g" onclick="cm('sync')" style="flex:1">Cancelar</button>
+      <button class="btn btn-g" onclick="restoreBackup()" style="flex:1">📥 Backup</button>
+      <button class="btn btn-p" onclick="saveSyncConf()" style="flex:2">Guardar y sincronizar</button>
+    </div>
+    <div style="margin-top:10px">
+      <button class="btn btn-g w100" onclick="exportBackup()">☁️ Exportar backup JSON</button>
+    </div>
+  </div>
+</div>
+
+<!-- NUEVA CARPETA -->
+<div class="overlay" id="m-folder" onclick="if(event.target===this)cm('folder')">
+  <div class="modal">
+    <div class="modal-title" id="folderMT">📁 Nueva carpeta</div>
+    <div class="ml">Nombre</div>
+    <input type="text" class="mi" id="folderName" placeholder="ej: 2026 - Semestre 1"/>
+    <div class="ml">Color</div>
+    <div class="color-row" id="folderColors"></div>
+    <input type="hidden" id="folderEId"/>
+    <div class="row" style="margin-top:14px">
+      <button class="btn btn-g" onclick="cm('folder')" style="flex:1">Cancelar</button>
+      <button class="btn btn-r" id="folderDelBtn" onclick="delFolder()" style="display:none">🗑</button>
+      <button class="btn btn-p" onclick="saveFolder()" style="flex:2">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- NUEVO CUADERNO -->
+<div class="overlay" id="m-nb" onclick="if(event.target===this)cm('nb')">
+  <div class="modal">
+    <div class="modal-title" id="nbMT">📓 Nuevo cuaderno</div>
+    <div class="ml">Nombre</div>
+    <input type="text" class="mi" id="nbNameIn" placeholder="ej: Psicología"/>
+    <div class="ml">Ícono</div>
+    <div class="icon-grid" id="nbIcons"></div>
+    <div class="ml">Color</div>
+    <div class="color-row" id="nbColors"></div>
+    <input type="hidden" id="nbEId"/>
+    <input type="hidden" id="nbFId"/>
+    <div class="row" style="margin-top:14px">
+      <button class="btn btn-g" onclick="cm('nb')" style="flex:1">Cancelar</button>
+      <button class="btn btn-r" id="nbDelBtn" onclick="delNb()" style="display:none">🗑</button>
+      <button class="btn btn-p" onclick="saveNb()" style="flex:2">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- EDITAR CUADERNO (desde dentro) -->
+<div class="overlay" id="m-eNb" onclick="if(event.target===this)cm('eNb')">
+  <div class="modal">
+    <div class="modal-title">✏️ Editar cuaderno</div>
+    <div class="ml">Nombre</div>
+    <input type="text" class="mi" id="eNbName" placeholder="Nombre"/>
+    <div class="ml">Ícono</div>
+    <div class="icon-grid" id="eNbIcons"></div>
+    <div class="ml">Color</div>
+    <div class="color-row" id="eNbColors"></div>
+    <div class="row" style="margin-top:14px">
+      <button class="btn btn-r" onclick="delCurNb()" style="flex:1">🗑 Eliminar</button>
+      <button class="btn btn-p" onclick="saveENb()" style="flex:2">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- AGREGAR FUENTE -->
+<div class="overlay" id="m-src" onclick="if(event.target===this)cm('src')">
+  <div class="modal">
+    <div class="modal-title">📎 Agregar fuente</div>
+    <div class="src-type-grid">
+      <div class="stc on" id="stype-file"    onclick="setST('file')">   <span class="si">📄</span>Archivo</div>
+      <div class="stc"    id="stype-image"   onclick="setST('image')">  <span class="si">🖼️</span>Imagen</div>
+      <div class="stc"    id="stype-audio"   onclick="setST('audio')">  <span class="si">🎵</span>Audio</div>
+      <div class="stc"    id="stype-youtube" onclick="setST('youtube')"><span class="si">▶️</span>YouTube</div>
+      <div class="stc"    id="stype-text"    onclick="setST('text')">   <span class="si">✏️</span>Texto</div>
+      <div class="stc"    id="stype-url"     onclick="setST('url')">    <span class="si">🔗</span>URL</div>
+    </div>
+    <div id="srcInputArea"></div>
+    <div class="row" style="margin-top:12px">
+      <button class="btn btn-g" onclick="cm('src')" style="flex:1">Cancelar</button>
+      <button class="btn btn-p" onclick="addSrc()" id="srcAddBtn" style="flex:2">Agregar</button>
+    </div>
+  </div>
+</div>
+
+<!-- GUARDAR SESIÓN -->
+<div class="overlay" id="m-save">
+  <div class="modal">
+    <div class="modal-title">💾 Guardar sesión</div>
+    <div class="ml">Título de la clase</div>
+    <input type="text" class="mi" id="sessTitle" placeholder="ej: Clase 1 – Introducción"/>
+    <div class="row" style="margin-top:12px">
+      <button class="btn btn-g" onclick="saveSess(false)" style="flex:1">Sin título</button>
+      <button class="btn btn-p" onclick="saveSess(true)" style="flex:2">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- OPCIONES SESIÓN -->
+<div class="overlay" id="m-sopt" onclick="if(event.target===this)cm('sopt')">
+  <div class="modal">
+    <div class="modal-title">⚙️ Opciones de sesión</div>
+    <div class="ml">Renombrar</div>
+    <input type="text" class="mi" id="sessRename" placeholder="Nuevo nombre"/>
+    <div class="row" style="margin-top:12px">
+      <button class="btn btn-r" onclick="delCurSess()" style="flex:1">🗑 Eliminar</button>
+      <button class="btn btn-p" onclick="renameSess()" style="flex:2">Renombrar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+//  CONFIG & CONSTANTS
+// ═══════════════════════════════════════════════════════════════
+const LIVE_WS  = k=>`wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContent?key=${k}`;
+const REST_URL = k=>`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${k}`;
+const LIVE_MODEL = 'models/gemini-2.5-flash-preview-native-audio-dialog';
+const COLORS  = ['#7c6fff','#a78bfa','#22c55e','#06b6d4','#f97316','#ef4444','#eab308','#ec4899','#14b8a6','#3b82f6'];
+const ICONS   = ['📓','🧠','🔬','⚗️','📐','🌎','💊','⚖️','💻','📖','🎭','🎵','🏛️','🧬','📊','🌱','🔭','✍️','🎓','🏥','🧪','📡'];
+const MAX_SESS = 8;
+
+// ═══════════════════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════════════════
+const S = {
+  view:'lib', nbId:null, sessId:null,
+  transcript:'', lastResult:'', lastTool:null,
+  isRec:false, isPaused:false, stopped:false,
+  secs:0, sessN:1,
+  ws:null, stream:null, actx:null, proc:null, src_node:null,
+  wl:null, ti:null,
+  qAns:[], qOk:0,
+  selFColor:COLORS[0], selNbIcon:ICONS[0], selNbColor:COLORS[0],
+  eNbIcon:ICONS[0], eNbColor:COLORS[0], srcType:'file'
+};
+
+// ═══════════════════════════════════════════════════════════════
+//  STORAGE
+// ═══════════════════════════════════════════════════════════════
+const DB = {
+  g(){return JSON.parse(localStorage.getItem('claseai')||'{"folders":[],"notebooks":[],"sessions":[]}');},
+  s(d){localStorage.setItem('claseai',JSON.stringify(d));},
+  uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,5);},
+  folders(){return this.g().folders||[];},
+  notebooks(fId){return(this.g().notebooks||[]).filter(n=>n.folderId===fId);},
+  allNbs(){return this.g().notebooks||[];},
+  sessions(nId){return(this.g().sessions||[]).filter(s=>s.notebookId===nId).sort((a,b)=>b.createdAt-a.createdAt);},
+  nb(id){return(this.g().notebooks||[]).find(n=>n.id===id);},
+  folder(id){return(this.g().folders||[]).find(f=>f.id===id);},
+  sess(id){return(this.g().sessions||[]).find(s=>s.id===id);},
+  sources(nId){return(this.g().notebooks||[]).find(n=>n.id===nId)?.sources||[];},
+
+  mkFolder(name,color){const d=this.g(),f={id:this.uid(),name,color,createdAt:Date.now()};d.folders.push(f);this.s(d);return f;},
+  updFolder(id,u){const d=this.g();d.folders=d.folders.map(f=>f.id===id?{...f,...u}:f);this.s(d);},
+  rmFolder(id){const d=this.g();d.folders=d.folders.filter(f=>f.id!==id);const nIds=d.notebooks.filter(n=>n.folderId===id).map(n=>n.id);d.notebooks=d.notebooks.filter(n=>n.folderId!==id);d.sessions=d.sessions.filter(s=>!nIds.includes(s.notebookId));this.s(d);},
+
+  mkNb(fId,name,icon,color){const d=this.g(),n={id:this.uid(),folderId:fId,name,icon,color,sources:[],createdAt:Date.now()};d.notebooks.push(n);this.s(d);return n;},
+  updNb(id,u){const d=this.g();d.notebooks=d.notebooks.map(n=>n.id===id?{...n,...u}:n);this.s(d);},
+  rmNb(id){const d=this.g();d.notebooks=d.notebooks.filter(n=>n.id!==id);d.sessions=d.sessions.filter(s=>s.notebookId!==id);this.s(d);},
+
+  mkSess(nId,title,transcript){const d=this.g(),sess={id:this.uid(),notebookId:nId,title,transcript,results:{},createdAt:Date.now(),duration:S.secs};d.sessions.push(sess);this.s(d);return sess;},
+  updSess(id,u){const d=this.g();d.sessions=d.sessions.map(s=>s.id===id?{...s,...u}:s);this.s(d);},
+  rmSess(id){const d=this.g();d.sessions=d.sessions.filter(s=>s.id!==id);this.s(d);},
+
+  addSrc(nId,src){const d=this.g();d.notebooks=d.notebooks.map(n=>n.id===nId?{...n,sources:[...(n.sources||[]),{id:this.uid(),addedAt:Date.now(),...src}]}:n);this.s(d);},
+  rmSrc(nId,sId){const d=this.g();d.notebooks=d.notebooks.map(n=>n.id===nId?{...n,sources:(n.sources||[]).filter(s=>s.id!==sId)}:n);this.s(d);}
+};
+
+// ═══════════════════════════════════════════════════════════════
+//  API KEY
+// ═══════════════════════════════════════════════════════════════
+const gk=()=>localStorage.getItem('claseai_key')||'';
+function saveKey(){
+  const k=document.getElementById('apiIn').value.trim();
+  if(!k){alert('Pega tu API key');return;}
+  localStorage.setItem('claseai_key',k);
+  document.getElementById('apiIn').value='';
+  document.getElementById('keyBtn').textContent='✅';
+  cm('key');
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  MODALS
+// ═══════════════════════════════════════════════════════════════
+function om(id){
+  if(id==='folder'){
+    document.getElementById('folderMT').textContent='📁 Nueva carpeta';
+    document.getElementById('folderName').value='';
+    document.getElementById('folderEId').value='';
+    document.getElementById('folderDelBtn').style.display='none';
+    S.selFColor=COLORS[0];
+    mkColorPicker('folderColors',COLORS,S.selFColor,c=>S.selFColor=c);
+  } else if(id==='nb'){
+    document.getElementById('nbMT').textContent='📓 Nuevo cuaderno';
+    document.getElementById('nbNameIn').value='';
+    document.getElementById('nbEId').value='';
+    document.getElementById('nbDelBtn').style.display='none';
+    S.selNbIcon=ICONS[0];S.selNbColor=COLORS[0];
+    mkIconPicker('nbIcons',ICONS,S.selNbIcon,i=>S.selNbIcon=i);
+    mkColorPicker('nbColors',COLORS,S.selNbColor,c=>S.selNbColor=c);
+  } else if(id==='eNb'){
+    const nb=DB.nb(S.nbId);if(!nb)return;
+    document.getElementById('eNbName').value=nb.name;
+    S.eNbIcon=nb.icon||ICONS[0];S.eNbColor=nb.color||COLORS[0];
+    mkIconPicker('eNbIcons',ICONS,S.eNbIcon,i=>S.eNbIcon=i);
+    mkColorPicker('eNbColors',COLORS,S.eNbColor,c=>S.eNbColor=c);
+  } else if(id==='sopt'){
+    const sess=DB.sess(S.sessId);
+    document.getElementById('sessRename').value=sess?.title||'';
+  } else if(id==='src'){
+    setST('file');
+  } else if(id==='sync'){
+    document.getElementById('syncCode').value=localStorage.getItem('claseai_sync_code')||'';
+    document.getElementById('fbConfig').value=localStorage.getItem('claseai_fb_config')||'';
+  }
+  document.getElementById('m-'+id).classList.add('on');
+}
+function cm(id){document.getElementById('m-'+id).classList.remove('on');}
+
+function mkColorPicker(cid,colors,sel,cb){
+  const c=document.getElementById(cid);c.innerHTML='';
+  colors.forEach(col=>{
+    const d=document.createElement('div');d.className='cswatch'+(col===sel?' on':'');
+    d.style.background=col;
+    d.onclick=()=>{c.querySelectorAll('.cswatch').forEach(s=>s.classList.remove('on'));d.classList.add('on');cb(col);};
+    c.appendChild(d);
+  });
+}
+function mkIconPicker(cid,icons,sel,cb){
+  const c=document.getElementById(cid);c.innerHTML='';
+  icons.forEach(icon=>{
+    const d=document.createElement('div');d.className='iopt'+(icon===sel?' on':'');
+    d.textContent=icon;
+    d.onclick=()=>{c.querySelectorAll('.iopt').forEach(i=>i.classList.remove('on'));d.classList.add('on');cb(icon);};
+    c.appendChild(d);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  FOLDER / NB CRUD
+// ═══════════════════════════════════════════════════════════════
+function saveFolder(){
+  const n=document.getElementById('folderName').value.trim();if(!n){alert('Escribe un nombre');return;}
+  const id=document.getElementById('folderEId').value;
+  id?DB.updFolder(id,{name:n,color:S.selFColor}):DB.mkFolder(n,S.selFColor);
+  cm('folder');renderLib();
+}
+function delFolder(){const id=document.getElementById('folderEId').value;if(!id||!confirm('¿Eliminar carpeta y todo su contenido?'))return;DB.rmFolder(id);cm('folder');renderLib();}
+function editFolder(id){
+  const f=DB.folder(id);
+  document.getElementById('folderMT').textContent='✏️ Editar carpeta';
+  document.getElementById('folderName').value=f.name;
+  document.getElementById('folderEId').value=id;
+  document.getElementById('folderDelBtn').style.display='block';
+  S.selFColor=f.color||COLORS[0];
+  mkColorPicker('folderColors',COLORS,S.selFColor,c=>S.selFColor=c);
+  document.getElementById('m-folder').classList.add('on');
+}
+function openNbModal(fId){document.getElementById('nbFId').value=fId;om('nb');}
+function saveNb(){
+  const n=document.getElementById('nbNameIn').value.trim();if(!n){alert('Escribe un nombre');return;}
+  const fId=document.getElementById('nbFId').value;
+  const id=document.getElementById('nbEId').value;
+  id?DB.updNb(id,{name:n,icon:S.selNbIcon,color:S.selNbColor}):DB.mkNb(fId,n,S.selNbIcon,S.selNbColor);
+  cm('nb');renderLib();
+}
+function delNb(){const id=document.getElementById('nbEId').value;if(!id||!confirm('¿Eliminar cuaderno y sus sesiones?'))return;DB.rmNb(id);cm('nb');renderLib();}
+function saveENb(){
+  const n=document.getElementById('eNbName').value.trim();if(!n){alert('Escribe un nombre');return;}
+  DB.updNb(S.nbId,{name:n,icon:S.eNbIcon,color:S.eNbColor});
+  cm('eNb');renderNb(S.nbId);
+}
+function delCurNb(){if(!confirm('¿Eliminar cuaderno?'))return;DB.rmNb(S.nbId);cm('eNb');goLib();}
+function delCurSess(){if(!confirm('¿Eliminar sesión?'))return;DB.rmSess(S.sessId);cm('sopt');goNb(S.nbId);}
+function renameSess(){const n=document.getElementById('sessRename').value.trim();if(!n)return;DB.updSess(S.sessId,{title:n});cm('sopt');renderBc();}
+
+// ═══════════════════════════════════════════════════════════════
+//  NAVIGATION
+// ═══════════════════════════════════════════════════════════════
+function showV(v){
+  document.querySelectorAll('.view').forEach(el=>el.classList.remove('on'));
+  document.getElementById('v-'+v).classList.add('on');
+  document.getElementById('bnav').style.display=v==='sess'?'flex':'none';
+  document.getElementById('content').scrollTop=0;
+  S.view=v;
+}
+function goLib(){
+  showV('lib');renderLib();
+  document.getElementById('bc').innerHTML='<span class="bc cur">🎓 Clase AI</span>';
+}
+function goNb(nbId){
+  S.nbId=nbId;showV('nb');renderNb(nbId);
+  const nb=DB.nb(nbId),f=DB.folder(nb?.folderId);
+  document.getElementById('bc').innerHTML=
+    `<span class="bc" onclick="goLib()">🎓</span>
+     <span class="bc-sep">›</span>
+     <span class="bc" onclick="goLib()">${f?.name||'Carpeta'}</span>
+     <span class="bc-sep">›</span>
+     <span class="bc cur">${nb?.icon||'📓'} ${nb?.name||''}</span>`;
+}
+function goRec(){
+  if(!S.nbId)return;showV('rec');
+  const nb=DB.nb(S.nbId);
+  document.getElementById('bc').innerHTML=
+    `<span class="bc" onclick="goNb(S.nbId)">← ${nb?.icon} ${nb?.name}</span>
+     <span class="bc-sep">›</span><span class="bc cur">🎙️ Grabando</span>`;
+}
+function goSess(sessId){
+  S.sessId=sessId;S.lastTool=null;S.lastResult='';
+  const sess=DB.sess(sessId);S.transcript=sess?.transcript||'';
+  document.querySelectorAll('.tool-btn').forEach(b=>b.classList.remove('on'));
+  document.getElementById('resultBox').className='result-box';
+  document.getElementById('fcGrid').innerHTML='';
+  document.getElementById('quizContainer').innerHTML='';
+  document.getElementById('quizScore').style.display='none';
+  document.getElementById('chatWrap').innerHTML='<div class="msg ai">¡Hola! Soy tu tutor. ¿Qué quieres repasar?</div>';
+  showV('sess');stab('tools');renderBc();
+}
+function renderBc(){
+  const nb=DB.nb(S.nbId),sess=DB.sess(S.sessId);
+  document.getElementById('bc').innerHTML=
+    `<span class="bc" onclick="goNb(S.nbId)">← ${nb?.icon} ${nb?.name}</span>
+     <span class="bc-sep">›</span>
+     <span class="bc cur">${sess?.title||'Sesión'}</span>
+     <span style="cursor:pointer;font-size:14px;margin-left:6px" onclick="om('sopt')">⚙️</span>`;
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  LIBRARY RENDER
+// ═══════════════════════════════════════════════════════════════
+function nbCard(nb){
+  const sc=DB.sessions(nb.id).length;
+  const last=DB.sessions(nb.id)[0];
+  const meta=last?new Date(last.createdAt).toLocaleDateString('es',{day:'numeric',month:'short'})+' · '+sc+' ses':'Sin sesiones';
+  const col=nb.color||COLORS[0];
+  const el=document.createElement('div');
+  el.className='nb-card';
+  el.style.background=`linear-gradient(135deg,${col}ee,${col}77 55%,#181b28 100%)`;
+  el.innerHTML=`
+    <div class="nb-card-bg"><div class="nb-card-watermark">${nb.icon||'📓'}</div></div>
+    <div class="nb-card-overlay"></div>
+    <div class="nb-card-dot" onclick="event.stopPropagation();openNbEdit('${nb.id}')">⋯</div>
+    <div class="nb-card-body">
+      <div class="nb-card-name">${nb.name}</div>
+      <div class="nb-card-meta">${meta}</div>
+    </div>`;
+  el.onclick=()=>goNb(nb.id);
+  return el;
+}
+function openNbEdit(id){
+  S.nbId=id;
+  const nb=DB.nb(id);
+  document.getElementById('nbMT').textContent='✏️ Editar cuaderno';
+  document.getElementById('nbNameIn').value=nb.name;
+  document.getElementById('nbEId').value=id;
+  document.getElementById('nbFId').value=nb.folderId;
+  document.getElementById('nbDelBtn').style.display='block';
+  S.selNbIcon=nb.icon||ICONS[0];S.selNbColor=nb.color||COLORS[0];
+  mkIconPicker('nbIcons',ICONS,S.selNbIcon,i=>S.selNbIcon=i);
+  mkColorPicker('nbColors',COLORS,S.selNbColor,c=>S.selNbColor=c);
+  document.getElementById('m-nb').classList.add('on');
+}
+function renderLib(filter){
+  const folders=DB.folders();
+  const allNbs=DB.allNbs();
+
+  // Recientes
+  const withSess=allNbs.filter(n=>DB.sessions(n.id).length>0)
+    .sort((a,b)=>(DB.sessions(b.id)[0]?.createdAt||0)-(DB.sessions(a.id)[0]?.createdAt||0))
+    .slice(0,4);
+  const recSec=document.getElementById('recSection');
+  const recGrid=document.getElementById('recGrid');
+  if(withSess.length&&!filter){
+    recSec.style.display='block';recGrid.innerHTML='';
+    withSess.forEach(nb=>recGrid.appendChild(nbCard(nb)));
+  } else recSec.style.display='none';
+
+  const c=document.getElementById('foldersEl');c.innerHTML='';
+  if(!folders.length){
+    c.innerHTML=`<div class="empty-lib"><span>📚</span>Crea tu primera carpeta<br/>para organizar tus materias 👆</div>`;
+    return;
+  }
+  folders.forEach(f=>{
+    let nbs=DB.notebooks(f.id);
+    if(filter)nbs=nbs.filter(n=>n.name.toLowerCase().includes(filter.toLowerCase()));
+    const total=nbs.reduce((a,n)=>a+DB.sessions(n.id).length,0);
+    const sec=document.createElement('div');sec.className='folder-sec';
+    sec.innerHTML=`
+      <div class="folder-sec-head">
+        <div class="folder-title" style="display:flex;align-items:center;gap:8px">
+          <div class="folder-dot" style="background:${f.color}"></div>
+          <span>📁 ${f.name}</span>
+          <span class="folder-info">${nbs.length} cuad · ${total} ses</span>
+        </div>
+        <div class="folder-btns">
+          <div class="f-btn" onclick="openNbModal('${f.id}')">+ Cuaderno</div>
+          <div class="f-btn" onclick="editFolder('${f.id}')">✏️</div>
+        </div>
+      </div>
+      <div class="nb-grid" id="ng-${f.id}"></div>`;
+    c.appendChild(sec);
+    const g=document.getElementById('ng-'+f.id);
+    nbs.forEach(nb=>g.appendChild(nbCard(nb)));
+    const add=document.createElement('div');add.className='nb-add-card';
+    add.innerHTML='<div class="nb-add-card-icon">➕</div><div>Nuevo cuaderno</div>';
+    add.onclick=()=>openNbModal(f.id);
+    g.appendChild(add);
+  });
+}
+function filterLib(v){renderLib(v);}
+
+// ═══════════════════════════════════════════════════════════════
+//  NOTEBOOK RENDER
+// ═══════════════════════════════════════════════════════════════
+function renderNb(nbId){
+  const nb=DB.nb(nbId),f=DB.folder(nb?.folderId);
+  const col=nb?.color||COLORS[0];
+  document.getElementById('nbAva').textContent=nb?.icon||'📓';
+  document.getElementById('nbAva').style.background=col+'33';
+  document.getElementById('nbName').textContent=nb?.name||'';
+  document.getElementById('nbFolder').textContent=`📁 ${f?.name||'Carpeta'}`;
+  nbtab('s');
+}
+function nbtab(t){
+  document.getElementById('nb-s-panel').style.display=t==='s'?'block':'none';
+  document.getElementById('nb-f-panel').style.display=t==='f'?'block':'none';
+  document.getElementById('nbt-s').classList.toggle('on',t==='s');
+  document.getElementById('nbt-f').classList.toggle('on',t==='f');
+  t==='s'?renderSess():renderSrcs();
+}
+function renderSess(){
+  const sessions=DB.sessions(S.nbId);
+  const c=document.getElementById('sessList');c.innerHTML='';
+  if(!sessions.length){c.innerHTML='<div class="empty-nb">Sin sesiones todavía.<br/>Graba tu primera clase 🎙️</div>';return;}
+  const groups={};
+  sessions.forEach(s=>{
+    const d=new Date(s.createdAt);const t=new Date();const y=new Date(t);y.setDate(t.getDate()-1);
+    const lbl=d.toDateString()===t.toDateString()?'Hoy':d.toDateString()===y.toDateString()?'Ayer':d.toLocaleDateString('es',{day:'numeric',month:'long'});
+    (groups[lbl]=groups[lbl]||[]).push(s);
+  });
+  Object.entries(groups).forEach(([lbl,ss])=>{
+    c.innerHTML+=`<div class="date-sep">📅 ${lbl}</div>`;
+    ss.forEach(s=>{
+      const words=s.transcript?.split(' ').length||0;
+      const dur=s.duration?fmtDur(s.duration):'';
+      const el=document.createElement('div');el.className='sess-card';
+      el.innerHTML=`
+        <div class="sess-icon">🎙️</div>
+        <div class="sess-info">
+          <div class="sess-title">${s.title||'Clase sin título'}</div>
+          <div class="sess-meta">${dur?dur+' · ':''}${words} palabras${Object.keys(s.results||{}).length?' · ✨ generado':''}</div>
+        </div>
+        <div class="sess-arrow">›</div>`;
+      el.onclick=()=>{S.nbId=S.nbId;goSess(s.id);};
+      c.appendChild(el);
+    });
+  });
+}
+function fmtDur(s){const h=Math.floor(s/3600),m=Math.floor((s%3600)/60);return h?`${h}h ${m}min`:m?`${m}min`:`${s}s`;}
+function renderSrcs(){
+  const srcs=DB.sources(S.nbId);
+  const c=document.getElementById('srcList');c.innerHTML='';
+  if(!srcs.length){c.innerHTML='<div class="empty-nb">Sin fuentes todavía.<br/>Agrega PDFs, YouTube, imágenes...</div>';return;}
+  const bg={file:'rgba(234,179,8,.15)',image:'rgba(6,182,212,.15)',audio:'rgba(167,139,250,.15)',youtube:'rgba(239,68,68,.15)',text:'rgba(34,197,94,.15)',url:'rgba(249,115,22,.15)'};
+  const ic={file:'📄',image:'🖼️',audio:'🎵',youtube:'▶️',text:'✏️',url:'🔗'};
+  srcs.forEach(src=>{
+    const el=document.createElement('div');el.className='src-item';
+    el.innerHTML=`<div class="src-item-icon" style="background:${bg[src.type]||'rgba(124,111,255,.15)'}">${ic[src.type]||'📎'}</div>
+      <div class="src-item-info"><div class="src-item-name">${src.name}</div><div class="src-item-meta">${src.type} · ${new Date(src.addedAt).toLocaleDateString('es')}</div></div>
+      <div class="src-del" onclick="DB.rmSrc('${S.nbId}','${src.id}');renderSrcs()">🗑️</div>`;
+    c.appendChild(el);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  SESSION TABS
+// ═══════════════════════════════════════════════════════════════
+function stab(t){
+  ['tools','cards','quiz','chat','export'].forEach(x=>{
+    document.getElementById('sp-'+x).style.display=x===t?'block':'none';
+    document.getElementById('st-'+x).classList.toggle('on',x===t);
+    const bn=document.getElementById('bn-'+x);if(bn)bn.classList.toggle('on',x===t);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  RECORDING ENGINE
+// ═══════════════════════════════════════════════════════════════
+function setPill(txt,cls=''){document.getElementById('spillTxt').textContent=txt;document.getElementById('spill').className='status-pill'+(cls?' '+cls:'');}
+function setLabel(txt){document.getElementById('recLabel').textContent=txt;}
+
+async function startRec(reconnect=false){
+  if(!gk()){om('key');return;}
+  if(!S.nbId)return;
+  if(!reconnect){
+    try{S.stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true}});}
+    catch(e){alert('Sin acceso al micrófono:\n'+e.message);return;}
+    S.secs=0;S.sessN=1;S.transcript='';S.stopped=false;S.isRec=true;S.isPaused=false;
+    document.getElementById('liveBox').innerHTML='<span class="ph">Escuchando...</span>';
+    document.getElementById('recBtn').disabled=true;
+    document.getElementById('recBtn').classList.add('active');
+    document.getElementById('pauseBtn').disabled=false;
+    document.getElementById('stopBtn').disabled=false;
+    S.ti=setInterval(()=>{S.secs++;updTimer();},1000);
+    try{if('wakeLock' in navigator)S.wl=await navigator.wakeLock.request('screen');}catch(e){}
+  }
+  if(!S.actx||S.actx.state==='closed'){
+    S.actx=new(window.AudioContext||window.webkitAudioContext)({sampleRate:16000});
+    if(S.actx.state==='suspended')await S.actx.resume();
+  }
+  S.src_node=S.actx.createMediaStreamSource(S.stream);
+  S.proc=S.actx.createScriptProcessor(4096,1,1);
+  const ws=new WebSocket(LIVE_WS(gk()));S.ws=ws;
+  document.getElementById('sessPill').textContent=`Sesión ${S.sessN}/${MAX_SESS} · máx 2h`;
+  setLabel(`Grabando · sesión ${S.sessN}`);
+  ws.onopen=()=>{
+    ws.send(JSON.stringify({setup:{model:LIVE_MODEL,generationConfig:{responseModalities:['TEXT']},inputAudioTranscription:{},systemInstruction:{parts:[{text:'Transcribe exactamente lo que escuchas en español. Solo transcribe, no respondas.'}]}}}));
+    setPill('Grabando','rec');document.getElementById('waveEl').style.display='flex';
+  };
+  ws.onmessage=e=>{
+    const m=JSON.parse(e.data),t=m.serverContent?.inputTranscription?.text?.trim();
+    if(t){
+      if(!S.transcript)document.getElementById('liveBox').innerHTML='';
+      S.transcript+=(S.transcript?' ':'')+t;
+      document.getElementById('liveBox').innerHTML='<p>'+S.transcript.replace(/\n/g,'</p><p>')+'</p>';
+      document.getElementById('liveBox').scrollTop=9999;
+    }
+  };
+  ws.onclose=()=>{
+    if(!S.stopped&&S.isRec&&S.sessN<MAX_SESS){S.sessN++;setTimeout(()=>startRec(true),800);}
+    else if(!S.stopped){setLabel('Límite de 2h alcanzado');finishRec();}
+  };
+  S.proc.onaudioprocess=ev=>{
+    if(!S.isRec||S.isPaused||!S.ws||S.ws.readyState!==1)return;
+    const f=ev.inputBuffer.getChannelData(0),i16=new Int16Array(f.length);
+    for(let i=0;i<f.length;i++)i16[i]=Math.max(-32768,Math.min(32767,Math.round(f[i]*32767)));
+    const b=new Uint8Array(i16.buffer);let s='';
+    for(let i=0;i<b.length;i+=8192)s+=String.fromCharCode(...b.subarray(i,i+8192));
+    ws.send(JSON.stringify({realtimeInput:{audio:{mimeType:`audio/pcm;rate=${S.actx.sampleRate}`,data:btoa(s)}}}));
+  };
+  S.src_node.connect(S.proc);S.proc.connect(S.actx.destination);
+}
+function pauseRec(){
+  if(!S.isRec)return;S.isPaused=!S.isPaused;
+  document.getElementById('pauseBtn').textContent=S.isPaused?'▶':'⏸';
+  document.getElementById('waveEl').style.display=S.isPaused?'none':'flex';
+  setPill(S.isPaused?'Pausado':'Grabando',S.isPaused?'warn':'rec');
+  setLabel(S.isPaused?'Pausado — toca ▶ para continuar':'Grabando...');
+  if(S.isPaused){clearInterval(S.ti);}else{S.ti=setInterval(()=>{S.secs++;updTimer();},1000);}
+}
+function stopRec(){
+  S.stopped=true;
+  if(S.ws&&S.ws.readyState===1){S.ws.send(JSON.stringify({clientContent:{turnComplete:true}}));setTimeout(finishRec,600);}
+  else finishRec();
+}
+function finishRec(){
+  S.isRec=false;S.isPaused=false;
+  clearInterval(S.ti);
+  ['proc','src_node'].forEach(k=>{if(S[k]){try{S[k].disconnect();}catch(e){}S[k]=null;}});
+  if(S.actx&&S.actx.state!=='closed'){try{S.actx.close();}catch(e){}S.actx=null;}
+  if(S.stream){S.stream.getTracks().forEach(t=>t.stop());S.stream=null;}
+  if(S.ws&&S.ws.readyState<=1){try{S.ws.close();}catch(e){}S.ws=null;}
+  if(S.wl){try{S.wl.release();}catch(e){}S.wl=null;}
+  document.getElementById('recBtn').disabled=false;
+  document.getElementById('recBtn').classList.remove('active');
+  document.getElementById('pauseBtn').disabled=true;
+  document.getElementById('pauseBtn').textContent='⏸';
+  document.getElementById('stopBtn').disabled=true;
+  document.getElementById('waveEl').style.display='none';
+  setPill('Listo','ok');setLabel('Grabación terminada ✓');
+  if(S.transcript.trim())document.getElementById('m-save').classList.add('on');
+}
+function updTimer(){
+  const h=Math.floor(S.secs/3600),m=Math.floor((S.secs%3600)/60),s=S.secs%60;
+  document.getElementById('recTimer').textContent=(h?String(h).padStart(2,'0')+':':'')+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+}
+function saveSess(useTitle){
+  const title=useTitle?document.getElementById('sessTitle').value.trim()||'Clase sin título':'Clase '+new Date().toLocaleDateString('es',{day:'numeric',month:'short'});
+  document.getElementById('m-save').classList.remove('on');
+  if(!S.transcript.trim())return;
+  const sess=DB.mkSess(S.nbId,title,S.transcript);
+  S.sessId=sess.id;goSess(sess.id);
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  GEMINI API
+// ═══════════════════════════════════════════════════════════════
+function fullCtx(){
+  const srcs=DB.sources(S.nbId);
+  const extra=srcs.length?'\n\nFUENTES DEL CUADERNO:\n'+srcs.map(s=>`[${s.type.toUpperCase()}: ${s.name}]\n${(s.content||'').slice(0,3000)}`).join('\n\n'):'';
+  return (S.transcript||'')+extra;
+}
+async function callGemini(prompt){
+  const r=await fetch(REST_URL(gk()),{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({contents:[{parts:[{text:prompt}]}]})});
+  const d=await r.json();if(d.error)throw new Error(d.error.message);
+  return d.candidates[0].content.parts[0].text;
+}
+async function callParts(parts){
+  const r=await fetch(REST_URL(gk()),{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({contents:[{parts}]})});
+  const d=await r.json();if(d.error)throw new Error(d.error.message);
+  return d.candidates[0].content.parts[0].text;
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  TOOLS
+// ═══════════════════════════════════════════════════════════════
+const P={
+  summary:c=>`Eres asistente académico. Genera **resumen ejecutivo** en español: tema principal, puntos clave, conclusión. Markdown.\n\n${c}`,
+  outline:c=>`Genera **esquema detallado** por temas/subtemas en español. Markdown jerárquico.\n\n${c}`,
+  questions:c=>`Genera **10 preguntas de repaso** con respuesta. Varía niveles. Markdown numerado.\n\n${c}`,
+  mindmap:c=>`Genera **mapa conceptual** con tema central, ramas y sub-conceptos usando → y sangría.\n\n${c}`,
+  presentation:c=>`Genera **presentación**: título, intro, 6 slides, conclusión. Por slide: título, 4 bullets, nota. Usa ---.\n\n${c}`,
+  report:c=>`Genera **informe académico formal**: resumen, intro, desarrollo, conclusiones.\n\n${c}`,
+  infographic:c=>`Genera contenido para **infografía**: título, 5 bloques con ícono, dato clave, frase.\n\n${c}`,
+  datatable:c=>`Extrae información en **tablas markdown**: conceptos, comparaciones, datos.\n\n${c}`,
+  cards:c=>`Genera 12 tarjetas. SOLO JSON:\n[{"q":"...","a":"..."}]\n\n${c}`,
+  quiz:c=>`Genera 8 preguntas opción múltiple. SOLO JSON:\n[{"question":"...","options":["a","b","c","d"],"correct":0,"explanation":"..."}]\n\n${c}`,
+  chat:(c,q)=>`Eres tutor académico. Alumno estudió:\n${c}\n\nResponde en español pedagógicamente.\nPREGUNTA: ${q}`
+};
+
+async function runTool(action){
+  if(!gk()){om('key');return;}
+  if(!S.transcript?.trim()){alert('Esta sesión no tiene transcripción');return;}
+  if(S.lastTool)document.getElementById('tb-'+S.lastTool)?.classList.remove('on');
+  document.getElementById('tb-'+action)?.classList.add('on');S.lastTool=action;
+  const box=document.getElementById('resultBox');box.className='result-box on';
+  box.innerHTML='<div class="loading"><div class="spin"></div>Generando con Gemini...</div>';
+  try{
+    const r=await callGemini(P[action](fullCtx()));
+    S.lastResult=r;box.innerHTML=marked.parse(r);
+    DB.updSess(S.sessId,{results:{...DB.sess(S.sessId)?.results,[action]:r}});
+    box.scrollIntoView({behavior:'smooth',block:'nearest'});
+  }catch(e){box.innerHTML=`<span style="color:var(--red)">Error: ${e.message}</span>`;}
+}
+
+async function loadCards(){
+  if(!gk()||!S.transcript?.trim()){alert('Necesitas key y transcripción');return;}
+  const g=document.getElementById('fcGrid');g.innerHTML='<div class="loading"><div class="spin"></div>Generando...</div>';
+  try{
+    let raw=await callGemini(P.cards(fullCtx()));
+    if(raw.includes('```'))raw=raw.split('\n').filter(l=>!l.startsWith('```')).join('\n').trim();
+    JSON.parse(raw).forEach(c=>{
+      const el=document.createElement('div');el.className='fc';
+      el.innerHTML=`<div class="fc-inner"><div class="fc-f"><span class="fc-lbl">Pregunta</span>${c.q}</div><div class="fc-b"><span class="fc-lbl">Respuesta</span>${c.a}</div></div>`;
+      el.onclick=()=>el.classList.toggle('flip');g.appendChild(el);
+    });
+    g.querySelector('.loading')?.remove();
+  }catch(e){g.innerHTML=`<span style="color:var(--red)">${e.message}</span>`;}
+}
+
+async function loadQuiz(){
+  if(!gk()||!S.transcript?.trim()){alert('Necesitas key y transcripción');return;}
+  const c=document.getElementById('quizContainer');document.getElementById('quizScore').style.display='none';
+  c.innerHTML='<div class="loading"><div class="spin"></div>Generando...</div>';S.qAns=[];S.qOk=0;
+  try{
+    let raw=await callGemini(P.quiz(fullCtx()));
+    if(raw.includes('```'))raw=raw.split('\n').filter(l=>!l.startsWith('```')).join('\n').trim();
+    const qs=JSON.parse(raw);S.qAns=new Array(qs.length).fill(-1);c.innerHTML='';
+    qs.forEach((q,qi)=>{
+      const el=document.createElement('div');el.className='quiz-card';
+      el.innerHTML=`<div class="quiz-num">Pregunta ${qi+1}/${qs.length}</div><div class="quiz-q">${q.question}</div>
+        <div class="quiz-opts" id="qo${qi}">${q.options.map((o,oi)=>`<button class="quiz-opt" onclick="ansQ(${qi},${oi},${q.correct})">${String.fromCharCode(65+oi)}. ${o}</button>`).join('')}</div>
+        <div class="quiz-exp" id="qe${qi}">${q.explanation}</div>`;
+      c.appendChild(el);
+    });
+  }catch(e){c.innerHTML=`<span style="color:var(--red)">${e.message}</span>`;}
+}
+function ansQ(qi,oi,correct){
+  if(S.qAns[qi]!==-1)return;S.qAns[qi]=oi;
+  document.querySelectorAll(`#qo${qi} .quiz-opt`).forEach((b,i)=>{b.classList.add('done');if(i===correct)b.classList.add('right');else if(i===oi)b.classList.add('wrong');});
+  document.getElementById('qe'+qi).style.display='block';if(oi===correct)S.qOk++;
+  if(S.qAns.every(a=>a!==-1)){
+    const pct=Math.round(S.qOk/S.qAns.length*100),em=pct>=80?'🏆':pct>=60?'👍':'📚';
+    const sc=document.getElementById('quizScore');sc.innerHTML=`<div class="score-banner">${em} ${S.qOk}/${S.qAns.length} — ${pct}%</div>`;sc.style.display='block';sc.scrollIntoView({behavior:'smooth',block:'nearest'});
+  }
+}
+
+async function sendChat(){
+  const inp=document.getElementById('chatIn'),q=inp.value.trim();if(!q||!gk())return;inp.value='';
+  const w=document.getElementById('chatWrap');
+  w.innerHTML+=`<div class="msg me">${q}</div><div class="msg ai" id="aiT"><div class="loading"><div class="spin"></div>Pensando...</div></div>`;
+  w.scrollTop=9999;
+  try{const r=await callGemini(P.chat(fullCtx(),q));const el=document.getElementById('aiT');el.id='';el.innerHTML=marked.parse(r);}
+  catch(e){const el=document.getElementById('aiT');el.id='';el.innerHTML=`<span style="color:var(--red)">${e.message}</span>`;}
+  w.scrollTop=9999;
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  SOURCES
+// ═══════════════════════════════════════════════════════════════
+function setST(t){
+  S.srcType=t;
+  document.querySelectorAll('.stc').forEach(c=>c.classList.remove('on'));
+  document.getElementById('stype-'+t)?.classList.add('on');
+  const a=document.getElementById('srcInputArea');
+  const fi=`<input type="file" id="srcFile" style="width:100%;background:var(--s2);border:1px solid var(--border);border-radius:10px;color:var(--text);padding:10px"/>`;
+  if(t==='file')      a.innerHTML=`<div class="ml">PDF, TXT, DOC</div>${fi.replace('id="srcFile"','id="srcFile" accept=".pdf,.txt,.doc,.docx"')}`;
+  else if(t==='image')a.innerHTML=`<div class="ml">Imagen (JPG, PNG, etc.)</div>${fi.replace('id="srcFile"','id="srcFile" accept="image/*"')}`;
+  else if(t==='audio')a.innerHTML=`<div class="ml">Audio (MP3, WAV, etc.)</div>${fi.replace('id="srcFile"','id="srcFile" accept="audio/*"')}`;
+  else if(t==='youtube'||t==='url')
+    a.innerHTML=`<div class="ml">URL</div><input type="url" class="mi" id="srcUrl" placeholder="${t==='youtube'?'https://youtube.com/watch?v=...':'https://...'}"/>`;
+  else if(t==='text')
+    a.innerHTML=`<div class="ml">Título</div><input type="text" class="mi" id="srcName" placeholder="ej: Apuntes cap. 3"/><div class="ml">Contenido</div><textarea class="mi" id="srcTxt" placeholder="Pega aquí tus notas..." style="height:90px"></textarea>`;
+}
+
+async function addSrc(){
+  if(!gk()){om('key');return;}
+  const btn=document.getElementById('srcAddBtn');btn.textContent='Procesando...';btn.disabled=true;
+  try{
+    const t=S.srcType;
+    if(t==='text'){
+      const name=document.getElementById('srcName')?.value.trim()||'Texto pegado';
+      const txt=document.getElementById('srcTxt')?.value.trim();
+      if(!txt)throw new Error('Escribe algún texto');
+      DB.addSrc(S.nbId,{type:'text',name,content:txt});
+    } else if(t==='youtube'||t==='url'){
+      const url=document.getElementById('srcUrl')?.value.trim();
+      if(!url)throw new Error('Ingresa una URL');
+      const prompt=t==='youtube'?[{fileData:{mimeType:'video/*',fileUri:url}},{text:'Transcribe y resume este video en español para uso académico.'}]:[{text:`Extrae el contenido más importante de esta URL para estudio: ${url}`}];
+      const content=await callParts(prompt);
+      DB.addSrc(S.nbId,{type:t,name:url.slice(0,60),content,url});
+    } else {
+      const file=document.getElementById('srcFile')?.files[0];
+      if(!file)throw new Error('Selecciona un archivo');
+      if(t==='file'){
+        let txt='';
+        if(file.type==='application/pdf'){
+          try{
+            pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+            const buf=await file.arrayBuffer();const pdf=await pdfjsLib.getDocument({data:buf}).promise;
+            for(let i=1;i<=Math.min(pdf.numPages,30);i++){const p=await pdf.getPage(i);const tc=await p.getTextContent();txt+=tc.items.map(it=>it.str).join(' ')+'\n';}
+          }catch(e){txt=`[PDF: ${file.name}]`;}
+        }else txt=await file.text();
+        DB.addSrc(S.nbId,{type:'file',name:file.name,content:txt.slice(0,12000)});
+      } else if(t==='image'){
+        const b64=await f2b64(file);
+        const desc=await callParts([{inlineData:{mimeType:file.type,data:b64}},{text:'Describe detalladamente el contenido de esta imagen para estudio académico.'}]);
+        DB.addSrc(S.nbId,{type:'image',name:file.name,content:desc});
+      } else if(t==='audio'){
+        const b64=await f2b64(file);
+        const trans=await callParts([{inlineData:{mimeType:file.type,data:b64}},{text:'Transcribe todo este audio en español.'}]);
+        DB.addSrc(S.nbId,{type:'audio',name:file.name,content:trans});
+      }
+    }
+    cm('src');renderSrcs();nbtab('f');
+  }catch(e){alert('Error: '+e.message);}
+  btn.textContent='Agregar';btn.disabled=false;
+}
+const f2b64=f=>new Promise((res,rej)=>{const r=new FileReader();r.onload=e=>res(e.target.result.split(',')[1]);r.onerror=rej;r.readAsDataURL(f);});
+
+// ═══════════════════════════════════════════════════════════════
+//  EXPORT
+// ═══════════════════════════════════════════════════════════════
+function xport(what,fmt){
+  const sess=DB.sess(S.sessId),nb=DB.nb(S.nbId);
+  const title=sess?.title||'Clase',date=new Date(sess?.createdAt||Date.now()).toLocaleDateString('es');
+  let txt='';
+  if(what==='transcript')txt=S.transcript||'Sin transcripción';
+  else if(what==='result')txt=S.lastResult||'Sin resultado generado';
+  else{
+    txt=`${nb?.name||''} — ${title} (${date})\n${'═'.repeat(50)}\n\nTRANSCRIPCIÓN\n${'─'.repeat(30)}\n${S.transcript||''}`;
+    if(S.lastResult)txt+=`\n\nRESULTADO GENERADO\n${'─'.repeat(30)}\n${S.lastResult}`;
+    const srcs=DB.sources(S.nbId);
+    if(srcs.length)txt+=`\n\nFUENTES (${srcs.length})\n${'─'.repeat(30)}\n`+srcs.map(s=>`[${s.type}] ${s.name}`).join('\n');
+  }
+  const fn=title.replace(/[^a-z0-9áéíóúñ\s]/gi,'_');
+  if(fmt==='txt'){dl(txt,fn+'.txt','text/plain');}
+  else{
+    const body=what==='result'?marked.parse(txt||''):txt.replace(/\n/g,'<br/>');
+    const w=`<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word'><head><meta charset='utf-8'/><style>body{font-family:Calibri;font-size:11pt;line-height:1.6;margin:2cm}h1,h2{color:#7c6fff}h2{font-size:14pt;margin-top:12pt}table{width:100%;border-collapse:collapse}th{background:#ede9ff;padding:6pt}td{padding:5pt;border-bottom:1pt solid #ddd}.hdr{background:#7c6fff;color:#fff;padding:12pt;margin-bottom:14pt;border-radius:4pt}</style></head><body><div class="hdr"><h1>${title}</h1><p>${nb?.name||''} · ${date}</p></div>${body}</body></html>`;
+    dl('\ufeff'+w,fn+'.doc','application/msword');
+  }
+}
+function dl(c,n,t){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([c],{type:t}));a.download=n;a.click();}
+
+// ═══════════════════════════════════════════════════════════════
+//  BACKUP / SYNC
+// ═══════════════════════════════════════════════════════════════
+function showBanner(msg,ok=true){
+  const b=document.getElementById('syncBanner');
+  b.textContent=msg;b.style.display='block';
+  b.style.background=ok?'rgba(34,197,94,.1)':'rgba(239,68,68,.1)';
+  b.style.border=`1px solid ${ok?'var(--green)':'var(--red)'}`;
+  b.style.color=ok?'var(--green)':'var(--red)';
+  setTimeout(()=>b.style.display='none',5000);
+}
+function exportBackup(){
+  const d=DB.g();dl(JSON.stringify(d,null,2),'ClaseAI_backup_'+new Date().toISOString().slice(0,10)+'.json','application/json');
+  showBanner(`✅ Backup exportado · ${d.notebooks?.length||0} cuadernos · ${d.sessions?.length||0} sesiones`);
+}
+function restoreBackup(){
+  const inp=document.createElement('input');inp.type='file';inp.accept='.json';
+  inp.onchange=async e=>{
+    const file=e.target.files[0];if(!file)return;
+    try{
+      const data=JSON.parse(await file.text());
+      if(!data.folders&&!data.notebooks&&!data.sessions)throw new Error('Archivo inválido');
+      const cur=DB.g();
+      const efIds=new Set(cur.folders.map(f=>f.id));
+      const enIds=new Set(cur.notebooks.map(n=>n.id));
+      const esIds=new Set(cur.sessions.map(s=>s.id));
+      DB.s({
+        folders:[...cur.folders,...(data.folders||[]).filter(f=>!efIds.has(f.id))],
+        notebooks:[...cur.notebooks,...(data.notebooks||[]).filter(n=>!enIds.has(n.id))],
+        sessions:[...cur.sessions,...(data.sessions||[]).filter(s=>!esIds.has(s.id))]
+      });
+      renderLib();showBanner(`✅ Backup restaurado · ${data.notebooks?.length||0} cuadernos importados`);
+    }catch(err){showBanner('❌ Error: '+err.message,false);}
+  };inp.click();cm('sync');
+}
+
+// ── Firebase sync (opcional) ────────────────────────────────────
+let FB=null;
+async function initFB(){
+  const cfg=localStorage.getItem('claseai_fb_config');if(!cfg||FB)return !!FB;
+  try{
+    const c=JSON.parse(cfg);
+    const {initializeApp}=await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js');
+    const {getFirestore,doc,setDoc,getDoc}=await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
+    FB={db:getFirestore(initializeApp(c)),doc,setDoc,getDoc};return true;
+  }catch(e){return false;}
+}
+async function saveSyncConf(){
+  const code=document.getElementById('syncCode').value.trim();
+  const cfg=document.getElementById('fbConfig').value.trim();
+  if(code)localStorage.setItem('claseai_sync_code',code);
+  if(cfg){
+    try{JSON.parse(cfg);localStorage.setItem('claseai_fb_config',cfg);}
+    catch(e){alert('Config JSON inválida');return;}
+  }
+  cm('sync');
+  if(cfg&&code){await cloudSync();}
+  else showBanner('✅ Código guardado · configura Firebase para sync automático');
+}
+async function cloudSync(){
+  const code=localStorage.getItem('claseai_sync_code');
+  if(!code){om('sync');return;}
+  if(!await initFB()){showBanner('ℹ️ Sin config Firebase — usa backup manual',false);return;}
+  try{
+    const {db,doc,setDoc,getDoc}=FB;
+    // Push local
+    await setDoc(doc(db,'claseai',code),{...DB.g(),updatedAt:Date.now()});
+    // Pull and merge
+    const snap=await getDoc(doc(db,'claseai',code));
+    if(snap.exists()){
+      const remote=snap.data();const cur=DB.g();
+      const efIds=new Set(cur.folders.map(f=>f.id));
+      const enIds=new Set(cur.notebooks.map(n=>n.id));
+      const esIds=new Set(cur.sessions.map(s=>s.id));
+      DB.s({
+        folders:[...cur.folders,...(remote.folders||[]).filter(f=>!efIds.has(f.id))],
+        notebooks:[...cur.notebooks,...(remote.notebooks||[]).filter(n=>!enIds.has(n.id))],
+        sessions:[...cur.sessions,...(remote.sessions||[]).filter(s=>!esIds.has(s.id))]
+      });
+      renderLib();showBanner('☁️ Sincronizado con la nube ✅');
+    }
+  }catch(e){showBanner('❌ Sync error: '+e.message,false);}
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════════════════
+window.addEventListener('load',()=>{
+  if(window.pdfjsLib)pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  if(gk()){document.getElementById('keyBtn').textContent='✅';}
+  // Demo data on first run
+  if(!DB.folders().length){
+    const f=DB.mkFolder('2026 – Semestre 1',COLORS[0]);
+    DB.mkNb(f.id,'Mi primera materia',ICONS[0],COLORS[1]);
+  }
+  goLib();
+  // Auto-sync if configured
+  const code=localStorage.getItem('claseai_sync_code');
+  const fbcfg=localStorage.getItem('claseai_fb_config');
+  if(code&&fbcfg)setTimeout(cloudSync,2000);
+});
+</script>
+</body>
+</html>
