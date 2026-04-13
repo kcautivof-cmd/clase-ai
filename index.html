@@ -1,10 +1,13 @@
-<html lang="es"><head>
-<meta charset="utf-8">
-<meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport">
-<meta content="yes" name="apple-mobile-web-app-capable">
-<meta content="black-translucent" name="apple-mobile-web-app-status-bar-style">
-<meta content="Clase AI" name="apple-mobile-web-app-title">
-<meta content="#0a0b14" name="theme-color">
+<!DOCTYPE html>
+
+<html lang="es">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
+<meta content="yes" name="apple-mobile-web-app-capable"/>
+<meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"/>
+<meta content="Clase AI" name="apple-mobile-web-app-title"/>
+<meta content="#0a0b14" name="theme-color"/>
 <title>Clase AI</title>
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
@@ -378,10 +381,12 @@ select.mi option{background:var(--s2);}
 <div class="app">
 <!-- ═══ TOPBAR ═══ -->
 <div class="topbar">
-<div class="topbar-bc" id="bc"><span class="bc cur">🎓 Clase AI</span></div>
+<div class="topbar-bc" id="bc">
+<span class="bc cur">🎓 Clase AI</span>
+</div>
 <div class="topbar-right">
 <div class="status-pill" id="spill"><span class="dot"></span><span id="spillTxt">Listo</span></div>
-<div class="t-btn" id="keyBtn" onclick="om('key')">✅</div>
+<div class="t-btn" id="keyBtn" onclick="om('key')">☁️</div>
 </div>
 </div>
 <!-- ═══ CONTENT ═══ -->
@@ -390,7 +395,7 @@ select.mi option{background:var(--s2);}
 <div class="view on" id="v-lib">
 <div class="lib-toprow">
 <div class="lib-search-wrap">
-<input class="lib-search" id="libSearch" oninput="filterLib(this.value)" placeholder="Buscar cuadernos...">
+<input class="lib-search" id="libSearch" oninput="filterLib(this.value)" placeholder="Buscar cuadernos..."/>
 </div>
 <div class="t-btn" onclick="restoreBackup()" title="Importar backup">📥</div>
 <div class="t-btn" onclick="om('sync')" title="Sync nube">☁️</div>
@@ -401,26 +406,7 @@ select.mi option{background:var(--s2);}
 <div class="sec-label">🕐 Recientes</div>
 <div class="nb-grid" id="recGrid"></div>
 </div>
-<div id="foldersEl"><div class="folder-sec">
-      <div class="folder-sec-head">
-        <div class="folder-title" style="display:flex;align-items:center;gap:8px">
-          <div class="folder-dot" style="background:#7c6fff"></div>
-          <span>📁 2026 – Semestre 1</span>
-          <span class="folder-info">1 cuad · 0 ses</span>
-        </div>
-        <div class="folder-btns">
-          <div class="f-btn" onclick="openNbModal('mnwpqjsypp3')">+ Cuaderno</div>
-          <div class="f-btn" onclick="editFolder('mnwpqjsypp3')">✏️</div>
-        </div>
-      </div>
-      <div class="nb-grid" id="ng-mnwpqjsypp3"><div class="nb-card" style="background: linear-gradient(135deg, rgba(167, 139, 250, 0.933), rgba(167, 139, 250, 0.467) 55%, rgb(24, 27, 40) 100%);">
-    <div class="nb-card-bg"><div class="nb-card-watermark">📓</div></div>
-    <div class="nb-card-overlay"></div>
-    <div class="nb-card-dot" onclick="event.stopPropagation();openNbEdit('mnwpqjszok8')">⋯</div>
-    <div class="nb-card-body">
-      <div class="nb-card-name">Mi primera materia</div>
-      <div class="nb-card-meta">Sin sesiones</div>
-    </div></div><div class="nb-add-card"><div class="nb-add-card-icon">➕</div><div>Nuevo cuaderno</div></div></div></div></div>
+<div id="foldersEl"></div>
 <div class="new-folder-row" onclick="om('folder')">📁 Nueva carpeta · semestre / año</div>
 </div>
 <!-- ██ NOTEBOOK ██ -->
@@ -474,8 +460,8 @@ select.mi option{background:var(--s2);}
 </div>
 <div class="rec-label" id="recLabel">Presiona para grabar</div>
 </div>
-<div class="sec-label" style="padding-bottom:8px">Transcripción en vivo</div>
-<div class="live-box" id="liveBox"><span class="ph">La transcripción aparece aquí...</span></div>
+<div class="sec-label" style="padding-bottom:8px">Estado de la sesión</div>
+<div class="live-box" id="liveBox"><span class="ph">Listo para grabar</span></div>
 </div>
 <!-- ██ SESSION ██ -->
 <div class="view" id="v-sess">
@@ -517,7 +503,7 @@ select.mi option{background:var(--s2);}
 <div style="font-size:11px;color:var(--muted);margin-bottom:8px">Tutor IA · pregunta sobre la clase y las fuentes</div>
 <div class="chat-wrap" id="chatWrap"><div class="msg ai">¡Hola! Soy tu tutor. ¿Qué quieres repasar?</div></div>
 <div class="chat-in">
-<input id="chatIn" onkeydown="if(event.key==='Enter')sendChat()" placeholder="Escribe tu pregunta..." type="text">
+<input id="chatIn" onkeydown="if(event.key==='Enter')sendChat()" placeholder="Escribe tu pregunta..." type="text"/>
 <button class="chat-send" onclick="sendChat()">➤</button>
 </div>
 </div>
@@ -554,9 +540,9 @@ select.mi option{background:var(--s2);}
 <!-- API KEY -->
 <div class="overlay" id="m-key" onclick="if(event.target===this)cm('key')">
 <div class="modal">
-<div class="modal-title">🔑 API Key de Gemini</div>
-<input class="mi" id="apiIn" placeholder="Pega tu API key aquí" type="password">
-<div class="hint">Obtén tu key gratis en <a href="https://aistudio.google.com/apikey" target="_blank">aistudio.google.com/apikey</a><br>Se guarda solo en tu dispositivo.</div>
+<div class="modal-title">☁️ Proxy de Cloudflare</div>
+<input class="mi" id="apiIn" placeholder="Esta app usa Cloudflare Worker" type="password"/>
+<div class="hint">Proxy activo:<br/><a href="https://clase-ai-proxy.kcautivof.workers.dev" target="_blank">https://clase-ai-proxy.kcautivof.workers.dev</a><br/>La API key real queda guardada en Cloudflare Secrets.</div>
 <div class="row"><button class="btn btn-g" onclick="cm('key')" style="flex:1">Cancelar</button><button class="btn btn-p" onclick="saveKey()" style="flex:2">Guardar</button></div>
 </div>
 </div>
@@ -565,13 +551,13 @@ select.mi option{background:var(--s2);}
 <div class="modal">
 <div class="modal-title">☁️ Sincronización entre dispositivos</div>
 <div class="ml">Código de sincronización</div>
-<input class="mi" id="syncCode" placeholder="Ej: kevin-clases-2026" type="text">
+<input class="mi" id="syncCode" placeholder="Ej: kevin-clases-2026" type="text"/>
 <div class="hint">
-      Usa el mismo código en tu iPhone y PC para compartir todos tus cuadernos automáticamente.<br>
+      Usa el mismo código en tu iPhone y PC para compartir todos tus cuadernos automáticamente.<br/>
       Requiere una config de Firebase gratuita. <a href="https://console.firebase.google.com" target="_blank">Crear proyecto Firebase →</a>
 </div>
 <div class="ml">Firebase Config (pega el objeto JSON)</div>
-<textarea class="mi" id="fbConfig" placeholder="{&quot;apiKey&quot;:&quot;...&quot;,&quot;authDomain&quot;:&quot;...&quot;,&quot;projectId&quot;:&quot;...&quot;}"></textarea>
+<textarea class="mi" id="fbConfig" placeholder='{"apiKey":"...","authDomain":"...","projectId":"..."}'></textarea>
 <div class="row" style="margin-top:10px">
 <button class="btn btn-g" onclick="cm('sync')" style="flex:1">Cancelar</button>
 <button class="btn btn-g" onclick="restoreBackup()" style="flex:1">📥 Backup</button>
@@ -587,10 +573,10 @@ select.mi option{background:var(--s2);}
 <div class="modal">
 <div class="modal-title" id="folderMT">📁 Nueva carpeta</div>
 <div class="ml">Nombre</div>
-<input class="mi" id="folderName" placeholder="ej: 2026 - Semestre 1" type="text">
+<input class="mi" id="folderName" placeholder="ej: 2026 - Semestre 1" type="text"/>
 <div class="ml">Color</div>
 <div class="color-row" id="folderColors"></div>
-<input id="folderEId" type="hidden">
+<input id="folderEId" type="hidden"/>
 <div class="row" style="margin-top:14px">
 <button class="btn btn-g" onclick="cm('folder')" style="flex:1">Cancelar</button>
 <button class="btn btn-r" id="folderDelBtn" onclick="delFolder()" style="display:none">🗑</button>
@@ -603,13 +589,13 @@ select.mi option{background:var(--s2);}
 <div class="modal">
 <div class="modal-title" id="nbMT">📓 Nuevo cuaderno</div>
 <div class="ml">Nombre</div>
-<input class="mi" id="nbNameIn" placeholder="ej: Psicología" type="text">
+<input class="mi" id="nbNameIn" placeholder="ej: Psicología" type="text"/>
 <div class="ml">Ícono</div>
 <div class="icon-grid" id="nbIcons"></div>
 <div class="ml">Color</div>
 <div class="color-row" id="nbColors"></div>
-<input id="nbEId" type="hidden">
-<input id="nbFId" type="hidden">
+<input id="nbEId" type="hidden"/>
+<input id="nbFId" type="hidden"/>
 <div class="row" style="margin-top:14px">
 <button class="btn btn-g" onclick="cm('nb')" style="flex:1">Cancelar</button>
 <button class="btn btn-r" id="nbDelBtn" onclick="delNb()" style="display:none">🗑</button>
@@ -622,7 +608,7 @@ select.mi option{background:var(--s2);}
 <div class="modal">
 <div class="modal-title">✏️ Editar cuaderno</div>
 <div class="ml">Nombre</div>
-<input class="mi" id="eNbName" placeholder="Nombre" type="text">
+<input class="mi" id="eNbName" placeholder="Nombre" type="text"/>
 <div class="ml">Ícono</div>
 <div class="icon-grid" id="eNbIcons"></div>
 <div class="ml">Color</div>
@@ -657,7 +643,7 @@ select.mi option{background:var(--s2);}
 <div class="modal">
 <div class="modal-title">💾 Guardar sesión</div>
 <div class="ml">Título de la clase</div>
-<input class="mi" id="sessTitle" placeholder="ej: Clase 1 – Introducción" type="text">
+<input class="mi" id="sessTitle" placeholder="ej: Clase 1 – Introducción" type="text"/>
 <div class="row" style="margin-top:12px">
 <button class="btn btn-g" onclick="saveSess(false)" style="flex:1">Sin título</button>
 <button class="btn btn-p" onclick="saveSess(true)" style="flex:2">Guardar</button>
@@ -669,7 +655,7 @@ select.mi option{background:var(--s2);}
 <div class="modal">
 <div class="modal-title">⚙️ Opciones de sesión</div>
 <div class="ml">Renombrar</div>
-<input class="mi" id="sessRename" placeholder="Nuevo nombre" type="text">
+<input class="mi" id="sessRename" placeholder="Nuevo nombre" type="text"/>
 <div class="row" style="margin-top:12px">
 <button class="btn btn-r" onclick="delCurSess()" style="flex:1">🗑 Eliminar</button>
 <button class="btn btn-p" onclick="renameSess()" style="flex:2">Renombrar</button>
@@ -680,13 +666,14 @@ select.mi option{background:var(--s2);}
 // ═══════════════════════════════════════════════════════════════
 //  CONFIG & CONSTANTS
 // ═══════════════════════════════════════════════════════════════
-const BUILTIN_API_KEY = 'AIzaSyBM6bvhbx-hwoJwUiK9wiXNFx_2mv4dl-U';
+const PROXY_BASE = 'https://clase-ai-proxy.kcautivof.workers.dev';
+const BUILTIN_API_KEY = ''; // proxy mode
 const TEXT_MODEL = 'gemini-2.5-flash';
 const AUDIO_MODEL = 'gemini-3.1-flash-lite-preview';
 const LIVE_MODEL = 'gemini-3.1-flash-live-preview';
-const TEXT_REST_URL = k=>`https://generativelanguage.googleapis.com/v1beta/models/${TEXT_MODEL}:generateContent?key=${k}`;
-const AUDIO_REST_URL = k=>`https://generativelanguage.googleapis.com/v1beta/models/${AUDIO_MODEL}:generateContent?key=${k}`;
-const LIVE_WS_URL = k=>`wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContent?key=${k}`;
+const TEXT_REST_URL = ()=>`${PROXY_BASE}/v1/text`;
+const AUDIO_REST_URL = ()=>`${PROXY_BASE}/v1/audio`;
+const LIVE_WS_URL = ()=>''; // disabled in proxy mode
 const TRANSCRIBE_CHUNK_SECONDS = 20;
 const TRANSCRIBE_MIN_FINAL_SECONDS = 2;
 const TRANSCRIBE_AFTER_STOP_CHUNK_SECONDS = 24;
@@ -748,13 +735,9 @@ const DB = {
 // ═══════════════════════════════════════════════════════════════
 //  API KEY
 // ═══════════════════════════════════════════════════════════════
-const gk=()=>localStorage.getItem('claseai_key')||BUILTIN_API_KEY||'';
+const gk=()=>PROXY_BASE;
 function saveKey(){
-  const k=document.getElementById('apiIn').value.trim();
-  if(!k){alert('Pega tu API key');return;}
-  localStorage.setItem('claseai_key',k);
-  document.getElementById('apiIn').value='';
-  document.getElementById('keyBtn').textContent='✅';
+  alert('Esta versión usa Cloudflare Worker automáticamente.\nNo necesitas pegar API key en la app.');
   cm('key');
 }
 
@@ -1150,14 +1133,32 @@ function getTranscriptText(){
 }
 function renderTranscript(){
   const box=document.getElementById('liveBox');
-  const finalText=(S.transcript||'').trim();
-  const liveText=(S.liveTurnText||'').trim();
-  if(!finalText&&!liveText){box.innerHTML='<span class="ph">La transcripción aparece aquí...</span>';return;}
-  let html='';
-  if(finalText)html+='<p>'+escHtml(finalText).replace(/\n{2,}/g,'</p><p>').replace(/\n/g,'<br/>')+'</p>';
-  if(liveText)html+='<p style="opacity:.82">'+escHtml(liveText).replace(/\n/g,'<br/>')+'</p>';
-  box.innerHTML=html;
-  box.scrollTop=999999;
+  const transcriptText=(getTranscriptText()||'').trim();
+  let audioState='Listo para grabar';
+  if(S.pendingStop) audioState='Procesando transcripción...';
+  else if(S.isRec && S.isPaused) audioState='Pausado';
+  else if(S.isRec) audioState='Grabando audio...';
+
+  let transcriptState='Pendiente';
+  if(transcriptText) transcriptState='Disponible';
+  if(S.pendingStop) transcriptState='Procesando';
+
+  const lines = [
+    ['Audio', audioState],
+    ['Duración', document.getElementById('recTimer')?.textContent || '00:00'],
+    ['Transcripción', transcriptState],
+    ['Modo', S.deferGeminiTranscription ? 'Se genera al detener' : 'Intento en vivo + respaldo'],
+    ['Última acción', document.getElementById('recLabel')?.textContent || 'Listo']
+  ];
+
+  const note = transcriptText
+    ? 'La sesión ya tiene texto procesado.'
+    : 'La transcripción se genera al finalizar la grabación.';
+  box.innerHTML =
+    '<div style="display:flex;flex-direction:column;gap:10px">' +
+    lines.map(([k,v]) => `<div style="display:flex;justify-content:space-between;gap:12px;font-size:13px;line-height:1.5"><span style="color:var(--muted);font-weight:700">${escHtml(k)}</span><span style="text-align:right">${escHtml(v)}</span></div>`).join('') +
+    `<div style="margin-top:6px;padding-top:10px;border-top:1px solid var(--border);font-size:12px;color:var(--muted);line-height:1.6">${escHtml(note)}</div>` +
+    '</div>';
 }
 function clearLiveTimer(){if(S.liveReadyTimer){clearTimeout(S.liveReadyTimer);S.liveReadyTimer=null;}}
 function clearFinalizingTimer(){if(S.finalizingTimeout){clearTimeout(S.finalizingTimeout);S.finalizingTimeout=null;}}
@@ -1315,7 +1316,7 @@ async function geminiJsonFetch(url,body,{retries=2,onRetry}={}){
 }
 async function transcribeChunk(base64Wav){
   const prompt='Transcribe literalmente este fragmento de audio. Devuelve solo la transcripción en español, sin resumen, sin traducción, sin comentarios y sin encabezados.';
-  const d=await geminiJsonFetch(AUDIO_REST_URL(gk()),{
+  const d=await geminiJsonFetch(AUDIO_REST_URL(),{
     generationConfig:{temperature:0},
     contents:[{parts:[
       {text:prompt},
@@ -1550,11 +1551,11 @@ function fullCtx(){
   return getCombinedTranscript()+extra;
 }
 async function callGemini(prompt,{onRetry}={}){
-  const d=await geminiJsonFetch(TEXT_REST_URL(gk()),{generationConfig:{temperature:0.4},contents:[{parts:[{text:prompt}]}]},{retries:2,onRetry});
+  const d=await geminiJsonFetch(TEXT_REST_URL(),{generationConfig:{temperature:0.4},contents:[{parts:[{text:prompt}]}]},{retries:2,onRetry});
   return extractTextFromResponse(d);
 }
 async function callParts(parts,{onRetry}={}){
-  const d=await geminiJsonFetch(TEXT_REST_URL(gk()),{contents:[{parts}]},{retries:2,onRetry});
+  const d=await geminiJsonFetch(TEXT_REST_URL(),{contents:[{parts}]},{retries:2,onRetry});
   return extractTextFromResponse(d);
 }
 
@@ -1826,11 +1827,8 @@ async function cloudSync(){
 // ═══════════════════════════════════════════════════════════════
 window.addEventListener('load',()=>{
   if(window.pdfjsLib)pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-  if(BUILTIN_API_KEY && !localStorage.getItem('claseai_key'))localStorage.setItem('claseai_key',BUILTIN_API_KEY);
-  if(gk()){
-    document.getElementById('keyBtn').textContent='✅';
-    document.getElementById('apiIn').value=gk();
-  }
+  document.getElementById('keyBtn').textContent='☁️';
+  document.getElementById('apiIn').value=PROXY_BASE;
   resetRecState();
   // Demo data on first run
   if(!DB.folders().length){
@@ -1844,6 +1842,5 @@ window.addEventListener('load',()=>{
   if(code&&fbcfg)setTimeout(cloudSync,2000);
 });
 </script>
-
-
-</body></html>
+</body>
+</html>
